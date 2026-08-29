@@ -69,9 +69,9 @@ criar um banco e rodar `mvn quarkus:dev`.
 
 | extensão | o que resolve | exemplo |
 |---|---|---|
-| **seedgrid-security** | Usuários, empresas, JWT, RBAC com permissões por papel, 2FA (TOTP e e-mail), política de senha, auto-cadastro com aprovação | [`seedgrid-security-example`](examples/seedgrid-security-example) ✅ |
+| **seedgrid-security** | Usuários, empresas, JWT, RBAC com permissões por papel, 2FA (TOTP e e-mail), política de senha, auto-cadastro com aprovação | [`seedgrid-security-example`](examples/seedgrid-security-example) |
 | **seedgrid-privacy** | Criptografia de dados pessoais em repouso e mascaramento em logs e auditoria | [`seedgrid-privacy-example`](examples/seedgrid-privacy-example) |
-| **seedgrid-audit** | Trilha de auditoria por anotação `@Audit`, com backend PostgreSQL ou MongoDB | [`seedgrid-audit-example`](examples/seedgrid-audit-example) ✅ |
+| **seedgrid-audit** | Trilha de auditoria por anotação `@Audit`, com backend PostgreSQL ou MongoDB | [`seedgrid-audit-example`](examples/seedgrid-audit-example) |
 | **seedgrid-apikeys** | Chaves de API com prefixo, hash e escopo, como alternativa ao JWT | [`seedgrid-apikeys-example`](examples/seedgrid-apikeys-example) |
 
 ### Multi-tenant — escolha **um** modelo
@@ -80,7 +80,7 @@ As duas extensões publicam o **mesmo contrato**; o que muda é onde os dados mo
 
 | extensão | modelo | quando faz sentido | exemplo |
 |---|---|---|---|
-| **seedgrid-login-tenancy** | Banco único, separação lógica por empresa | A maioria dos SaaS. Mais simples de operar, migrations em um lugar só | [`seedgrid-login-tenancy-example`](examples/seedgrid-login-tenancy-example) ✅ |
+| **seedgrid-login-tenancy** | Banco único, separação lógica por empresa | A maioria dos SaaS. Mais simples de operar, migrations em um lugar só | [`seedgrid-login-tenancy-example`](examples/seedgrid-login-tenancy-example) |
 | **seedgrid-subdomain-tenancy** | Um banco por tenant, resolvido pelo subdomínio | Isolamento forte por cliente, exigência regulatória, backup e restore por cliente | [`seedgrid-subdomain-tenancy-example`](examples/seedgrid-subdomain-tenancy-example) ✅ |
 
 Cada uma publica um **BOM**: o host declara *uma* versão — a da tenancy — importa o
@@ -98,9 +98,10 @@ versão da tenancy e esquecer a do security, que só aparece muito depois e long
 | **seedgrid-resilience** | Circuit breaker, retry e timeout com defaults sensatos | [`seedgrid-resilience-example`](examples/seedgrid-resilience-example) |
 | **seedgrid-whatsapp** | Envio por WhatsApp, agnóstico de provedor (Evolution API ou Cloud API) | [`seedgrid-whatsapp-example`](examples/seedgrid-whatsapp-example) |
 
-✅ = README verificado ponta a ponta: alguém seguiu os passos numa máquina limpa e a
-aplicação subiu. Os demais têm README, mas ainda não passaram por essa verificação —
-se esbarrar em algo, abra uma issue.
+✅ = README verificado ponta a ponta: os passos foram executados a partir de banco
+vazio e a aplicação subiu. Por ora só o `subdomain-tenancy` passou por essa
+verificação — os demais trazem o README que já tinham, e a verificação de cada um
+vem a seguir. Se esbarrar em algo antes disso, abra uma issue.
 
 ---
 
