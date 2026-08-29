@@ -26,8 +26,22 @@ podman compose -f infra/compose.yml up -d
 # ou: docker compose -f infra/compose.yml up -d
 ```
 
-Isso sobe Postgres em `5439`, MongoDB em `27019` e pgAdmin em `5051`. As portas são
-deslocadas de propósito para não conflitar com um banco que você já tenha rodando.
+Isso sobe:
+
+| serviço | porta | para que |
+|---|---|---|
+| PostgreSQL | `5439` | todos os exemplos |
+| MongoDB | `27019` | trilha de auditoria com estratégia `MONGODB` |
+| pgAdmin | `5051` | inspecionar o banco pelo navegador |
+| MinIO | `9010` (API) / `9011` (console) | storage S3, com os buckets já criados |
+
+As portas são deslocadas de propósito para não conflitar com serviços que você já
+tenha rodando.
+
+Nenhum exemplo *precisa* do MinIO para subir — todos vêm com `filesystem`. Ele está
+aí para você trocar o backend e ver que a troca custa uma variável de ambiente. Um
+container `seedgrid-examples-minio-init` cria os buckets e encerra; vê-lo como
+`Exited (0)` é o esperado.
 
 **2. Gere as chaves JWT do exemplo que quer rodar:**
 
@@ -97,8 +111,10 @@ Este repositório é público e **não contém segredo nenhum**. O que você enc
 - senhas de containers locais (`postgres`, `admin`) — valem só na sua máquina;
 - uma chave de criptografia de demonstração que decodifica para
   `exemplo-nao-use-em-producao-1234`, escolhida para ser óbvia;
+- as credenciais do MinIO local (`minioadmin`/`minioadmin`), que só existem
+  dentro do seu compose;
 - placeholders `COLOQUE_SUA_..._AQUI` onde seria preciso uma credencial real
-  (SMTP, WhatsApp, MinIO). Os exemplos sobem sem elas; só a funcionalidade
+  (SMTP, WhatsApp). Os exemplos sobem sem elas; só a funcionalidade
   correspondente fica inerte.
 
 As chaves JWT você gera localmente no passo 2, e o `.gitignore` impede que sejam

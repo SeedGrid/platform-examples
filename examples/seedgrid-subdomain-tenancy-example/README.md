@@ -26,8 +26,10 @@ Da raiz do repositório:
 podman compose -f infra/compose.yml up -d
 ```
 
-Sobe Postgres em `5439`, MongoDB em `27019` (usado pela trilha de auditoria) e pgAdmin
-em `5051`.
+Sobe Postgres em `5439`, MongoDB em `27019` (trilha de auditoria), pgAdmin em `5051`
+e MinIO em `9010`. Este exemplo não precisa do MinIO — o avatar vai para disco — mas
+ele fica disponível caso você queira trocar o backend; veja o bloco comentado em
+`dev.env`.
 
 ### 2. Chaves JWT
 
