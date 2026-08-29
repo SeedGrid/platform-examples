@@ -1,0 +1,28 @@
+# Build artifacts
+target/
+
+# Maven
+.mvn/timing.properties
+dependency-reduced-pom.xml
+
+# Quarkus local/dev files
+.quarkus/
+*.log
+
+# Environment and local overrides
+.env
+.env.*
+!.env.example
+*.local
+
+# IDEs and editors
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db

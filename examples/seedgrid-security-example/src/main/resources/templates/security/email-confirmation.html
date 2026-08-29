@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirme seu e-mail</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #007bff;
+        }
+        .header h1 {
+            color: #007bff;
+            margin: 0;
+        }
+        .content {
+            padding: 20px 0;
+            line-height: 1.6;
+            color: #333333;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            margin: 20px 0;
+            background-color: #007bff;
+            color: #ffffff !important;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .button:hover {
+            background-color: #0056b3;
+        }
+        .token-box {
+            margin: 20px 0;
+            padding: 16px;
+            background-color: #f8f9fa;
+            border: 1px solid #d9dee3;
+            border-radius: 6px;
+        }
+        .token-label {
+            margin: 0 0 8px;
+            color: #555555;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .token-value {
+            margin: 0;
+            font-family: "Courier New", monospace;
+            font-size: 15px;
+            color: #111111;
+            word-break: break-all;
+        }
+        .footer {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #eeeeee;
+            color: #777777;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Confirme seu e-mail</h1>
+        </div>
+        <div class="content">
+            <p>Olá, <strong>{name}</strong>!</p>
+            <p>Obrigado por se cadastrar! Para completar seu registro, por favor confirme seu endereço de e-mail clicando no botão abaixo:</p>
+            <p style="text-align: center;">
+                <a href="{confirmationLink}" class="button"><span style="color: #ffffff;">Confirmar E-mail</span></a>
+            </p>
+            <div class="token-box">
+                <p class="token-label">Token de confirmação</p>
+                <p class="token-value">{confirmationToken}</p>
+            </div>
+            <p>Se você não criou uma conta, por favor ignore este e-mail.</p>
+            <p>Este link expira em 24 horas.</p>
+        </div>
+        <div class="footer">
+            <p>Este é um e-mail automático, por favor não responda.</p>
+        </div>
+    </div>
+</body>
+</html>

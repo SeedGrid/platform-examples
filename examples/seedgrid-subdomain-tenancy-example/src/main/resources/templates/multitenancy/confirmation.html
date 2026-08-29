@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmação de Cadastro - SeedGrid Test</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+        .content {
+            padding: 40px 30px;
+        }
+        .content h2 {
+            color: #2c3e50;
+            margin-top: 0;
+        }
+        .code-block {
+            text-align: center;
+            margin: 30px 0;
+        }
+        .code-label {
+            font-size: 13px;
+            color: #7f8c8d;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+        .code-value {
+            display: inline-block;
+            font-size: 36px;
+            font-weight: bold;
+            letter-spacing: 8px;
+            font-family: 'Courier New', monospace;
+            background: #f8f9fa;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            padding: 16px 32px;
+            color: #2c3e50;
+        }
+        .expiry {
+            color: #555;
+            margin-top: 20px;
+        }
+        .footer-note {
+            font-size: 12px;
+            color: #7f8c8d;
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+            margin-top: 25px;
+        }
+        .footer {
+            background-color: #f8f9fa;
+            text-align: center;
+            padding: 20px;
+            font-size: 12px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>SeedGrid Test</h1>
+            <p>Plataforma de Testes Multitenancy</p>
+        </div>
+        <div class="content">
+            <h2>Olá, {name}!</h2>
+
+            <p>Foi realizada a criação de uma conta vinculada à empresa <strong>{tradeName}</strong>, sob sua responsabilidade.</p>
+
+            <p>Para concluir o cadastro, informe o código abaixo na tela de confirmação:</p>
+
+            <div class="code-block">
+                <p class="code-label">Código</p>
+                <div class="code-value">{validationCode}</div>
+            </div>
+
+            <p class="expiry">Este código é pessoal e expira em <strong>{expiryMinutes} minutos</strong>.</p>
+
+            <p class="footer-note">
+                * Se você não solicitou esse cadastro, pode ignorar este e-mail.
+            </p>
+        </div>
+        <div class="footer">
+            <p>© 2024 SeedGrid Test. Todos os direitos reservados.</p>
+            <p>Este é um email automático, por favor não responda.</p>
+        </div>
+    </div>
+</body>
+</html>

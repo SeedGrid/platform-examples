@@ -1,0 +1,6 @@
+﻿Olá {name},
+
+Seu código de verificação é: {code}
+Ele expira em {expiresInMinutes} minuto(s).
+
+Se você não solicitou este acesso, ignore esta mensagem.

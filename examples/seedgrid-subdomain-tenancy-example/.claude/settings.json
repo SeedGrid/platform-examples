@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -E \"^\\\\./\\(seedgrid-quarkus-ext-[^/]+\\)/pom\\\\.xml$\")",
+      "Bash(del \"c:\\\\empreendedorismo\\\\seedgrid\\\\seedgrid-quarkus-ext-security\\\\runtime\\\\src\\\\main\\\\java\\\\br\\\\com\\\\seedgrid\\\\security\\\\interceptors\\\\SgPermissionAllowedInterceptor.java\")",
+      "Read(//usr/local/bin/**)",
+      "Read(//c/Users/lucia/bin/**)",
+      "Bash(export JAVA_HOME=\"/c/Users/lucia/.sdkman/candidates/java/21.0.9-graal\")",
+      "Bash(export PATH=\"$JAVA_HOME/bin:/c/tools/apache-maven-3.8.8/bin:$PATH\")"
+    ],
+    "additionalDirectories": [
+      "c:\\empreendedorismo\\seedgrid\\seedgrid-quarkus-ext-security\\runtime\\src\\main\\java\\br\\com\\seedgrid\\security\\interceptors",
+      "c:\\empreendedorismo\\seedgrid\\seedgrid-quarkus-ext-apikeys\\runtime\\src\\main\\java\\br\\com\\seedgrid\\apikeys\\security",
+      "c:\\empreendedorismo\\seedgrid\\seedgrid-quarkus-ext-security\\runtime\\src\\main\\java\\br\\com\\seedgrid\\security\\controllers",
+      "c:\\empreendedorismo\\seedgrid\\seedgrid-quarkus-ext-apikeys\\runtime\\src\\main\\java\\br\\com\\seedgrid\\apikeys\\controllers",
+      "c:\\empreendedorismo\\seedgrid\\seedgrid-quarkus-ext-audit\\runtime\\src\\main\\java\\br\\com\\seedgrid\\audit\\controllers",
+      "c:\\empreendedorismo\\seedgrid\\seedgrid-quarkus-ext-backup\\runtime\\src\\main\\java\\br\\com\\seedgrid\\backup\\controllers",
+      "c:\\empreendedorismo\\seedgrid\\seedgrid-quarkus-ext-billing\\seedgrid-billing-core\\runtime\\src\\main\\java\\br\\com\\seedgrid\\billing\\controllers",
+      "c:\\empreendedorismo\\seedgrid\\seedgrid-quarkus-lib-commons\\src\\main\\java\\br\\com\\seedgrid\\commons\\security\\annotations",
+      "c:\\empreendedorismo\\seedgrid"
+    ]
+  }
+}

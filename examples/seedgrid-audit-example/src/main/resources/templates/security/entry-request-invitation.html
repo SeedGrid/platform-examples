@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Você foi convidado!</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+            overflow: hidden;
+        }
+        .header {
+            background-color: #5c35d4;
+            padding: 32px 24px;
+            text-align: center;
+        }
+        .header h1 {
+            color: #ffffff;
+            margin: 0;
+            font-size: 24px;
+            letter-spacing: 0.5px;
+        }
+        .header p {
+            color: #d9cfff;
+            margin: 8px 0 0 0;
+            font-size: 14px;
+        }
+        .content {
+            padding: 32px 28px;
+            line-height: 1.7;
+            color: #333333;
+        }
+        .invite-box {
+            background-color: #f3f0ff;
+            border-left: 4px solid #5c35d4;
+            border-radius: 0 6px 6px 0;
+            padding: 16px 20px;
+            margin: 24px 0;
+        }
+        .invite-box p {
+            margin: 0;
+            color: #3d2a7a;
+            font-size: 15px;
+        }
+        .invite-box strong {
+            color: #5c35d4;
+        }
+        .button-wrapper {
+            text-align: center;
+            margin: 32px 0;
+        }
+        .button {
+            display: inline-block;
+            padding: 14px 36px;
+            background-color: #5c35d4;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 16px;
+            letter-spacing: 0.3px;
+        }
+        .expiry-notice {
+            background-color: #fff8e1;
+            border-left: 4px solid #ffc107;
+            border-radius: 0 6px 6px 0;
+            padding: 12px 16px;
+            margin: 24px 0 8px 0;
+            font-size: 13px;
+            color: #6d4c00;
+        }
+        .fallback-link {
+            font-size: 12px;
+            color: #888888;
+            text-align: center;
+            margin-top: 16px;
+            word-break: break-all;
+        }
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #eeeeee;
+            color: #999999;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Você foi convidado!</h1>
+            <p>Complete seu cadastro na plataforma</p>
+        </div>
+        <div class="content">
+            <p>Olá, <strong>{name}</strong>!</p>
+
+            <div class="invite-box">
+                <p><strong>{invitedBy}</strong> convidou você para concluir seu cadastro na plataforma.</p>
+            </div>
+
+            <p>Clique no botão abaixo para acessar o formulário de cadastro e finalizar o seu registro:</p>
+
+            <div class="button-wrapper">
+                <a href="{invitationLink}" class="button">Concluir Cadastro</a>
+            </div>
+
+            <div class="expiry-notice">
+                <strong>Atenção:</strong> Este convite expira em <strong>{expiresInHours} hora(s)</strong>. Após esse prazo, será necessário solicitar um novo convite.
+            </div>
+
+            <p class="fallback-link">
+                Se o botão não funcionar, copie e cole este link no seu navegador:<br>
+                {invitationLink}
+            </p>
+        </div>
+        <div class="footer">
+            <p>Este é um e-mail automático, por favor não responda.</p>
+        </div>
+    </div>
+</body>
+</html>

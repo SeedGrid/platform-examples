@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>br.com.seedgrid</groupId>
+    <artifactId>seedgrid-subdomain-tenancy-example</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+
+    <properties>
+        <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
+        <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
+        <quarkus.platform.version>3.30.6</quarkus.platform.version>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <!-- UNICA versao SeedGrid que este host declara. O BOM importado abaixo
+             (seedgrid-subdomain-tenancy-parent) manda as versoes de commons, security,
+             privacy, audit, billing, backup e apikeys. NAO pinar essas libs na mao: pin
+             direto e' mais raso e vence por mediacao, entao esquecer de subir um deles
+             junto com este faz o host rodar com foundation mais velha do que a extensao
+             espera — e o sintoma aparece longe da causa. -->
+        <seedgrid.subdomain-tenancy.version>2026.08.29</seedgrid.subdomain-tenancy.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>${quarkus.platform.group-id}</groupId>
+                <artifactId>${quarkus.platform.artifact-id}</artifactId>
+                <version>${quarkus.platform.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>br.com.seedgrid</groupId>
+                <artifactId>seedgrid-subdomain-tenancy-parent</artifactId>
+                <version>${seedgrid.subdomain-tenancy.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <!-- ===== O que este host NAO precisa declarar =====
+             A seedgrid-subdomain-tenancy ja traz em compile, transitivo: quarkus-arc,
+             rest-jackson, hibernate-orm(+panache), jdbc-postgresql, agroal, flyway,
+             hibernate-validator, smallrye-openapi, qute, mailer, opentelemetry, micrometer
+             e fault-tolerance — mais as libs seedgrid commons, security, privacy, audit-core,
+             apikeys, backup e billing-core. Isso vale ate' para o que o codigo deste app
+             importa direto (br.com.seedgrid.audit.*, br.com.seedgrid.privacy.*): a versao
+             ja vem do BOM, entao redeclarar so cria uma segunda verdade para desatualizar.
+             O que sobra abaixo e' o que a extensao deliberadamente NAO decide pelo host. -->
+
+        <!-- A extensao de tenancy: a unica versao seedgrid deste pom. -->
+        <dependency>
+            <groupId>br.com.seedgrid</groupId>
+            <artifactId>seedgrid-subdomain-tenancy</artifactId>
+            <version>${seedgrid.subdomain-tenancy.version}</version>
+        </dependency>
+
+        <!-- Escolhas de backend, que sao do host e nao da extensao -->
+
+        <!-- Mongo: e' <optional> na extensao (ela suporta os dois backends de audit sem
+             obrigar nenhum), entao quem escolhe a estrategia MONGODB traz o driver. -->
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-mongodb-client</artifactId>
+        </dependency>
+        <!-- Provider de audit correspondente, em runtime: a extensao so traz o audit-core. -->
+        <dependency>
+            <groupId>br.com.seedgrid</groupId>
+            <artifactId>seedgrid-audit-mongodb</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <!-- Provider de billing: a extensao traz o billing-core (a API), nunca um gateway. -->
+        <dependency>
+            <groupId>br.com.seedgrid</groupId>
+            <artifactId>seedgrid-billing-stripe</artifactId>
+        </dependency>
+
+        <!-- Lombok -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.42</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Test: escopo test nao e' transitivo, precisa ser declarado aqui. -->
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-junit5</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.rest-assured</groupId>
+            <artifactId>rest-assured</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Postgres + Mongo reais (Testcontainers) — substitui o H2 -->
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>1.21.3</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>1.21.3</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>mongodb</artifactId>
+            <version>1.21.3</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>io.quarkus</groupId>
+                <artifactId>quarkus-maven-plugin</artifactId>
+                <version>${quarkus.platform.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>build</goal>
+                            <goal>generate-code</goal>
+                            <goal>generate-code-tests</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.11.0</version>
+                <configuration>
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.target}</target>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>1.18.42</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

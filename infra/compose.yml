@@ -1,0 +1,60 @@
+# Infraestrutura compartilhada por todos os exemplos.
+#
+#   podman compose -f infra/compose.yml up -d      (ou docker compose)
+#
+# As portas sao deslocadas de proposito (5439 em vez de 5432, 27019 em vez de
+# 27017) para nao brigar com um Postgres ou Mongo que voce ja tenha rodando.
+# Se mudar aqui, mude tambem o dev.env do exemplo.
+services:
+
+  # Usado por todos os exemplos. Cada um cria o proprio banco — veja o README
+  # do exemplo; o subdomain-tenancy exige que o banco master exista ANTES do
+  # primeiro boot, porque e' nele que o Flyway roda as migrations.
+  postgres:
+    image: postgres:16
+    container_name: seedgrid-examples-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    ports:
+      - "5439:5432"
+    volumes:
+      - seedgrid-examples-pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Necessario apenas para os exemplos que usam audit com estrategia MONGODB
+  # (audit e subdomain-tenancy). Os demais ignoram.
+  mongodb:
+    image: mongo:7
+    container_name: seedgrid-examples-mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin
+    ports:
+      - "27019:27017"
+    volumes:
+      - seedgrid-examples-mongo:/data/db
+
+  # Interface web para inspecionar o Postgres em http://localhost:5051
+  # login: admin@exemplo.com.br / admin
+  # Ao conectar, use host "postgres" e porta 5432 (rede interna do compose).
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: seedgrid-examples-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@exemplo.com.br
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+    ports:
+      - "5051:80"
+    depends_on:
+      - postgres
+
+volumes:
+  seedgrid-examples-pg:
+  seedgrid-examples-mongo:

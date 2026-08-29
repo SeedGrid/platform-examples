@@ -1,0 +1,40 @@
+# Chaves JWT — geradas localmente por scripts/gerar-chaves-jwt.{sh,ps1}.
+# NUNCA versione chave privada num repositorio publico.
+*.pem
+**/src/main/resources/keys/
+
+# Se voce quiser guardar suas credenciais reais sem risco de commitar,
+# copie o dev.env para dev.local.env e edite esse.
+dev.local.env
+*.local.env
+.env
+
+# Build
+target/
+!.mvn/wrapper/maven-wrapper.jar
+dependency-reduced-pom.xml
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.settings/
+.project
+.classpath
+.factorypath
+nbproject/
+nb-configuration.xml
+
+# SO
+.DS_Store
+Thumbs.db
+
+# Logs e temporarios
+*.log
+*.log.*
+jmeter.log
+*.tmp
+*.swp
+*~
