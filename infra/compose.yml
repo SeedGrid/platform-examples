@@ -7,9 +7,9 @@
 # Se mudar aqui, mude tambem o dev.env do exemplo.
 services:
 
-  # Usado por todos os exemplos. Cada um cria o proprio banco — veja o README
-  # do exemplo; o subdomain-tenancy exige que o banco master exista ANTES do
-  # primeiro boot, porque e' nele que o Flyway roda as migrations.
+  # Ja sobe com o banco de todos os exemplos criado (postgres-init/). As
+  # extensoes rodam as migrations do Flyway dentro de um banco existente — nao
+  # criam o banco —, entao esse pre-passo fica aqui e ninguem precisa pensar nele.
   postgres:
     image: postgres:16
     container_name: seedgrid-examples-postgres
@@ -21,6 +21,9 @@ services:
       - "5439:5432"
     volumes:
       - seedgrid-examples-pg:/var/lib/postgresql/data
+      # Cria o banco de cada exemplo na primeira subida. Assim ninguem precisa
+      # criar banco na mao antes de rodar.
+      - ./postgres-init:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
@@ -95,6 +98,25 @@ services:
       echo 'buckets prontos:';
       mc ls local;
       "
+
+
+  # Servidor SMTP de mentira que captura tudo que os exemplos enviam e mostra numa
+  # caixa de entrada web: http://localhost:8025
+  #
+  # E' o que fecha o fluxo de avaliacao. O seedgrid-security exige e-mail
+  # confirmado para o primeiro login, e o link de confirmacao chega por e-mail —
+  # sem isso voce precisaria de um SMTP de verdade so para conseguir entrar.
+  # Nada sai para a internet: as mensagens ficam so aqui.
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: seedgrid-examples-mailpit
+    environment:
+      MP_MAX_MESSAGES: 500
+      MP_SMTP_AUTH_ACCEPT_ANY: "true"
+      MP_SMTP_AUTH_ALLOW_INSECURE: "true"
+    ports:
+      - "1025:1025"   # SMTP
+      - "8025:8025"   # caixa de entrada web
 
 volumes:
   seedgrid-examples-pg:

@@ -15,7 +15,8 @@ As extensões são publicadas no Maven Central sob o groupId `br.com.seedgrid`.
 | JDK | 21+ | `java -version` |
 | Maven | 3.9+ | `mvn -v` |
 | Podman ou Docker | qualquer recente | `podman --version` |
-| OpenSSL | qualquer | `openssl version` (no Windows, use o Git Bash) |
+
+É só isso — nada de OpenSSL nem de criar banco na mão.
 
 ## Os três passos comuns a todos os exemplos
 
@@ -34,32 +35,38 @@ Isso sobe:
 | MongoDB | `27019` | trilha de auditoria com estratégia `MONGODB` |
 | pgAdmin | `5051` | inspecionar o banco pelo navegador |
 | MinIO | `9010` (API) / `9011` (console) | storage S3, com os buckets já criados |
+| Mailpit | `8025` | caixa de entrada local: todo e-mail enviado pelos exemplos cai aqui |
 
 As portas são deslocadas de propósito para não conflitar com serviços que você já
 tenha rodando.
 
-Nenhum exemplo *precisa* do MinIO para subir — todos vêm com `filesystem`. Ele está
-aí para você trocar o backend e ver que a troca custa uma variável de ambiente. Um
-container `seedgrid-examples-minio-init` cria os buckets e encerra; vê-lo como
-`Exited (0)` é o esperado.
+O Postgres já sobe com o banco de todos os exemplos criado, e o Mailpit captura os
+e-mails — é ele que te dá o link de confirmação do primeiro login sem precisar de um
+SMTP de verdade. Um container `seedgrid-examples-minio-init` cria os buckets e
+encerra; vê-lo como `Exited (0)` é o esperado.
 
-**2. Gere as chaves JWT do exemplo que quer rodar:**
+**2. Rode o exemplo que quiser:**
 
 ```bash
-./scripts/gerar-chaves-jwt.sh seedgrid-security-example
-# Windows PowerShell: .\scripts\gerar-chaves-jwt.ps1 seedgrid-security-example
+cd examples/seedgrid-security-example
+source dev.env && mvn quarkus:dev
+# Windows PowerShell: .un-dev.ps1
 ```
 
-As chaves **não são versionadas** aqui de propósito — chave privada em repositório
-público é um convite a copiá-la para produção.
+É isso. O banco já foi criado pelo compose, e as chaves JWT são geradas no build
+(Java puro, sem OpenSSL). As chaves **não são versionadas** de propósito — chave
+privada em repositório público é um convite a copiá-la para produção.
 
-**3. Siga o README do exemplo.** Cada um diz exatamente o que falta: quase sempre
-criar um banco e rodar `mvn quarkus:dev`.
+**3. Entre.** Cada exemplo com autenticação cria um admin no primeiro boot:
 
-> Um detalhe que vale saber antes: os exemplos **não criam o banco sozinhos**. O
-> Flyway roda as migrations dentro de um banco que já existe, então criá-lo é sempre
-> um passo explícito no README. Nos exemplos multi-tenant isso importa mais, porque
-> o banco *master* precisa existir antes do primeiro boot.
+| | |
+|---|---|
+| usuário | `admin@exemplo.com.br` |
+| senha | `Admin@123` |
+
+No primeiro login o e-mail precisa ser confirmado. O link chega na caixa de entrada
+local, em **<http://localhost:8025>** — nada sai para a internet. Abra, clique no
+link do e-mail "Bem-vindo! Confirme seu e-mail" e pronto.
 
 ---
 
@@ -69,9 +76,9 @@ criar um banco e rodar `mvn quarkus:dev`.
 
 | extensão | o que resolve | exemplo |
 |---|---|---|
-| **seedgrid-security** | Usuários, empresas, JWT, RBAC com permissões por papel, 2FA (TOTP e e-mail), política de senha, auto-cadastro com aprovação | [`seedgrid-security-example`](examples/seedgrid-security-example) |
+| **seedgrid-security** | Usuários, empresas, JWT, RBAC com permissões por papel, 2FA (TOTP e e-mail), política de senha, auto-cadastro com aprovação | [`seedgrid-security-example`](examples/seedgrid-security-example) ✅ |
 | **seedgrid-privacy** | Criptografia de dados pessoais em repouso e mascaramento em logs e auditoria | [`seedgrid-privacy-example`](examples/seedgrid-privacy-example) |
-| **seedgrid-audit** | Trilha de auditoria por anotação `@Audit`, com backend PostgreSQL ou MongoDB | [`seedgrid-audit-example`](examples/seedgrid-audit-example) |
+| **seedgrid-audit** | Trilha de auditoria por anotação `@Audit`, com backend PostgreSQL ou MongoDB | [`seedgrid-audit-example`](examples/seedgrid-audit-example) ✅ |
 | **seedgrid-apikeys** | Chaves de API com prefixo, hash e escopo, como alternativa ao JWT | [`seedgrid-apikeys-example`](examples/seedgrid-apikeys-example) |
 
 ### Multi-tenant — escolha **um** modelo
@@ -80,7 +87,7 @@ As duas extensões publicam o **mesmo contrato**; o que muda é onde os dados mo
 
 | extensão | modelo | quando faz sentido | exemplo |
 |---|---|---|---|
-| **seedgrid-login-tenancy** | Banco único, separação lógica por empresa | A maioria dos SaaS. Mais simples de operar, migrations em um lugar só | [`seedgrid-login-tenancy-example`](examples/seedgrid-login-tenancy-example) |
+| **seedgrid-login-tenancy** | Banco único, separação lógica por empresa | A maioria dos SaaS. Mais simples de operar, migrations em um lugar só | [`seedgrid-login-tenancy-example`](examples/seedgrid-login-tenancy-example) ✅ |
 | **seedgrid-subdomain-tenancy** | Um banco por tenant, resolvido pelo subdomínio | Isolamento forte por cliente, exigência regulatória, backup e restore por cliente | [`seedgrid-subdomain-tenancy-example`](examples/seedgrid-subdomain-tenancy-example) ✅ |
 
 Cada uma publica um **BOM**: o host declara *uma* versão — a da tenancy — importa o
@@ -98,10 +105,9 @@ versão da tenancy e esquecer a do security, que só aparece muito depois e long
 | **seedgrid-resilience** | Circuit breaker, retry e timeout com defaults sensatos | [`seedgrid-resilience-example`](examples/seedgrid-resilience-example) |
 | **seedgrid-whatsapp** | Envio por WhatsApp, agnóstico de provedor (Evolution API ou Cloud API) | [`seedgrid-whatsapp-example`](examples/seedgrid-whatsapp-example) |
 
-✅ = README verificado ponta a ponta: os passos foram executados a partir de banco
-vazio e a aplicação subiu. Por ora só o `subdomain-tenancy` passou por essa
-verificação — os demais trazem o README que já tinham, e a verificação de cada um
-vem a seguir. Se esbarrar em algo antes disso, abra uma issue.
+✅ = verificado: os passos acima foram executados a partir de banco vazio e a
+aplicação subiu. Os quatro marcados passaram por isso; os demais trazem o README que
+já tinham e entram na próxima rodada. Se esbarrar em algo antes disso, abra uma issue.
 
 ---
 

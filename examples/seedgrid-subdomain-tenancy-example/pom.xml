@@ -121,6 +121,16 @@
             <version>1.21.3</version>
             <scope>test</scope>
         </dependency>
+
+        <!-- SDK do MinIO. No seedgrid-filemanagement ele e' <optional>, entao NAO chega
+             transitivo: sem esta dependencia, SEEDGRID_SECURITY_AVATAR_STORAGE=minio
+             quebra em runtime com NoClassDefFoundError io/minio/MinioClient na primeira
+             gravacao — o boot passa normalmente, o erro so aparece no upload. -->
+        <dependency>
+            <groupId>io.minio</groupId>
+            <artifactId>minio</artifactId>
+            <version>8.5.9</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -154,6 +164,30 @@
                         </path>
                     </annotationProcessorPaths>
                 </configuration>
+            </plugin>
+
+            <!-- Gera o par de chaves JWT antes de compilar, se ainda nao existir.
+                 E' Java puro (nada de openssl) e nao sobrescreve chave existente,
+                 entao `mvn quarkus:dev` funciona no clone recem-feito sem passo
+                 manual nenhum. As chaves ficam fora do git (.gitignore). -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.5.0</version>
+                <executions>
+                    <execution>
+                        <id>gerar-chaves-jwt</id>
+                        <phase>generate-resources</phase>
+                        <goals><goal>exec</goal></goals>
+                        <configuration>
+                            <executable>${java.home}/bin/java</executable>
+                            <arguments>
+                                <argument>${project.basedir}/../../scripts/GerarChavesJwt.java</argument>
+                                <argument>${project.basedir}/src/main/resources/keys</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
