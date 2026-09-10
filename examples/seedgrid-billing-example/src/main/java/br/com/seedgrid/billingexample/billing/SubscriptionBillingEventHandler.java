@@ -5,12 +5,11 @@ import java.time.Instant;
 
 import org.jboss.logging.Logger;
 
+import br.com.seedgrid.billing.entities.PlanEntity;
 import br.com.seedgrid.billing.BillingEventHandler;
 import br.com.seedgrid.billing.domain.BillingEvent;
 import br.com.seedgrid.billing.domain.BillingReference;
-import br.com.seedgrid.billingexample.entity.Plan;
 import br.com.seedgrid.billingexample.entity.Subscription;
-import br.com.seedgrid.billingexample.repository.PlanRepository;
 import br.com.seedgrid.billingexample.repository.SubscriptionRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -38,9 +37,6 @@ public class SubscriptionBillingEventHandler implements BillingEventHandler {
     @Inject
     SubscriptionRepository subscriptionRepository;
 
-    @Inject
-    PlanRepository planRepository;
-
     @Override
     @Transactional
     public void handle(BillingEvent event) {
@@ -62,7 +58,9 @@ public class SubscriptionBillingEventHandler implements BillingEventHandler {
                     "Evento de billing sem companyId (reference.externalReference) ou planCode (metadata)");
         }
 
-        Plan plan = planRepository.findByCode(planCode)
+        // Desde o billing 2026.09.10 o plano e' do core (PlanEntity, Panache active record); este
+        // exemplo nao tem mais tabela nem repositorio proprios de plano.
+        PlanEntity plan = PlanEntity.<PlanEntity>find("code", planCode).firstResultOptional()
                 .orElseThrow(() -> new IllegalArgumentException("Plano desconhecido: " + planCode));
 
         Subscription subscription = subscriptionRepository.findByCompanyId(companyId)

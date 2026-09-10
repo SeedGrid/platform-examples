@@ -64,7 +64,7 @@
         <dependency>
             <groupId>br.com.seedgrid</groupId>
             <artifactId>seedgrid-login-tenancy</artifactId>
-            <version>2026.08.29</version>
+            <version>2026.09.10-1</version>
         </dependency>
         <!-- Provider de auditoria (backend JPA). O host final escolhe o provider;
              as libs (security/tenancy/backup) trazem apenas o audit-core. -->

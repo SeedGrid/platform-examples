@@ -2,10 +2,9 @@ package br.com.seedgrid.billingexample.service;
 
 import java.util.Optional;
 
+import br.com.seedgrid.billing.entities.PlanEntity;
 import br.com.seedgrid.billingexample.dto.SubscriptionDTO;
-import br.com.seedgrid.billingexample.entity.Plan;
 import br.com.seedgrid.billingexample.entity.Subscription;
-import br.com.seedgrid.billingexample.repository.PlanRepository;
 import br.com.seedgrid.billingexample.repository.SubscriptionRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -16,18 +15,18 @@ public class SubscriptionService {
     @Inject
     SubscriptionRepository subscriptionRepository;
 
-    @Inject
-    PlanRepository planRepository;
-
     public Optional<SubscriptionDTO> findForCompany(Long companyId) {
         return subscriptionRepository.findByCompanyId(companyId).map(this::toDTO);
     }
 
     private SubscriptionDTO toDTO(Subscription subscription) {
-        Plan plan = planRepository.findById(subscription.getPlanId());
+        // O plano vem do seedgrid-billing-core desde 2026.09.10 -- este exemplo nao mantem mais
+        // tabela nem repositorio proprios de plano. PlanEntity e' Panache active record, entao a
+        // busca e' estatica e nao ha nada a injetar.
+        PlanEntity plan = PlanEntity.findById(subscription.getPlanId());
         return new SubscriptionDTO(
-                plan == null ? null : plan.getCode(),
-                plan == null ? null : plan.getName(),
+                plan == null ? null : plan.code,
+                plan == null ? null : plan.name,
                 subscription.getStatus().name(),
                 subscription.getProviderSubscriptionId(),
                 subscription.getCurrentPeriodEnd(),

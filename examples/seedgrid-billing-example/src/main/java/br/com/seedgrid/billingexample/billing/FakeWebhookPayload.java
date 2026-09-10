@@ -10,7 +10,7 @@ package br.com.seedgrid.billingexample.billing;
  *                              (ex.: "CHECKOUT_COMPLETED", "SUBSCRIPTION_CREATED",
  *                              "SUBSCRIPTION_CANCELED")
  * @param companyId             id (numerico) da company da app host dona da assinatura
- * @param planCode              codigo do {@link br.com.seedgrid.billingexample.entity.Plan} (ex.: "PRO")
+ * @param planCode              codigo do {@link br.com.seedgrid.billing.entities.PlanEntity} (ex.: "PRO")
  * @param subscriptionId        id fake da assinatura no "provider" (ex.: "sub_abc123")
  * @param customerId            id fake do cliente no "provider" (ex.: "cus_abc123")
  * @param checkoutSessionId     (opcional) id da sessao de checkout que originou o evento

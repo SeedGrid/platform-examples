@@ -13,10 +13,10 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * Assinatura de uma {@link br.com.seedgrid.security.entities.Company} a um {@link Plan}. Uma
+ * Assinatura de uma {@link br.com.seedgrid.security.entities.Company} a um {@link br.com.seedgrid.billing.entities.PlanEntity}. Uma
  * linha por company (unique em company_id) — o exemplo mantem 1 assinatura ativa por vez, criada
  * e mantida em dia pelo {@code SubscriptionBillingEventHandler} conforme os webhooks de billing
- * chegam. O seedgrid-billing-core so persiste eventos brutos (BillingEventEntity); Plan/Subscription
+ * chegam. O seedgrid-billing-core e' dono do plano (PlanEntity/PlanTermEntity); a Subscription
  * sao responsabilidade da app host, como documentado no SPI.
  */
 @Entity
