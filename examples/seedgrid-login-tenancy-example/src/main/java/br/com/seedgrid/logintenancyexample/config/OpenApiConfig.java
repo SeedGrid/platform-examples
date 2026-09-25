@@ -22,7 +22,7 @@ import org.eclipse.microprofile.openapi.annotations.security.SecurityScheme;
 
             Fluxo:
             1. POST /public/signup — cria a solicitacao de cadastro (empresa + usuario root).
-            2. POST /public/signup/confirm-email — confirma o e-mail e cria Company + BaseUser ROOT.
+            2. POST /public/signup/confirm-email — confirma o e-mail e cria Company + User ROOT.
             3. POST /public/auth/login — autentica e retorna o JWT (claim companyId).
             4. Use o token nos endpoints /api/products — cada company so ve seus proprios registros.
             """

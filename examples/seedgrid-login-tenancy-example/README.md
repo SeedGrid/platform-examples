@@ -29,7 +29,7 @@ Cliente ──JWT(companyId=42)──▶ CompanyContextFilter ──▶ CompanyR
    e-mail/senha do root). Cria uma `signup_request` PENDENTE e dispara e-mail com o token de
    confirmação.
 2. **`POST /public/signup/confirm-email`** `{ "token": "..." }` — confirma o e-mail: cria a
-   `Company` (ou vincula, se o e-mail já existir) e o `BaseUser` **ROOT DA CONTA** (membership
+   `Company` (ou vincula, se o e-mail já existir) e o `User` **ROOT DA CONTA** (membership
    aditivo: `user_companies.is_root=true`, não root global).
 3. **`POST /public/auth/login`** — autentica. Com **exatamente 1** company vinculada, o token já
    nasce **escopado** (`claim companyId`). Com mais de uma, o login retorna `companyId=null` e o

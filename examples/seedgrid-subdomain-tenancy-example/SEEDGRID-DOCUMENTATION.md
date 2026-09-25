@@ -685,7 +685,7 @@ public class CustomEmailService implements EmailServiceInterface {
 **Default Bean**: ✅ `DefaultJwtTokenCustomizer` (retorna HashMap vazio)
 
 **Métodos**:
-- `Map<String, Object> customizeClaims(BaseUser user, List<String> roles, String hostHeader)`
+- `Map<String, Object> customizeClaims(User user, List<String> roles, String hostHeader)`
 
 **Exemplo de Implementação**:
 ```java
@@ -695,7 +695,7 @@ public class CustomEmailService implements EmailServiceInterface {
 public class CustomJwtTokenCustomizer implements JwtTokenCustomizer {
 
     @Override
-    public Map<String, Object> customizeClaims(BaseUser user, List<String> roles, String hostHeader) {
+    public Map<String, Object> customizeClaims(User user, List<String> roles, String hostHeader) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("department", user.getDepartment());
         claims.put("employee_id", user.getEmployeeId());
@@ -834,9 +834,9 @@ public class CustomTemplateSecurityProvider implements TemplateSecurityProvider 
 
 **Métodos**:
 - `String getMethodCode()`
-- `boolean canInitiate(BaseUser user)`
-- `void initiate(BaseUser user)`
-- `boolean verify(BaseUser user, String code)`
+- `boolean canInitiate(User user)`
+- `void initiate(User user)`
+- `boolean verify(User user, String code)`
 
 **Exemplo de Implementação (SMS)**:
 ```java
@@ -855,19 +855,19 @@ public class SmsTwoFactorStrategy implements TwoFactorStrategy {
     }
 
     @Override
-    public boolean canInitiate(BaseUser user) {
+    public boolean canInitiate(User user) {
         return user.getPhoneNumber() != null && !user.getPhoneNumber().isEmpty();
     }
 
     @Override
-    public void initiate(BaseUser user) {
+    public void initiate(User user) {
         String code = generateRandomCode();
         codeRepo.save(user, code, 5); // expira em 5 minutos
         smsProvider.send(user.getPhoneNumber(), "Seu código: " + code);
     }
 
     @Override
-    public boolean verify(BaseUser user, String code) {
+    public boolean verify(User user, String code) {
         return codeRepo.verify(user, code);
     }
 
@@ -888,7 +888,7 @@ public class SmsTwoFactorStrategy implements TwoFactorStrategy {
 **Default Bean**: ✅ `DefaultTwoFactorEmailTemplateProvider`
 
 **Métodos**:
-- `EmailTemplate buildCodeEmail(BaseUser user, String code, int expiresInMinutes)`
+- `EmailTemplate buildCodeEmail(User user, String code, int expiresInMinutes)`
 
 **Inner Class**: `EmailTemplate` (contém `subject`, `htmlBody`, `textBody`)
 
@@ -900,7 +900,7 @@ public class SmsTwoFactorStrategy implements TwoFactorStrategy {
 public class CustomTwoFactorEmailTemplateProvider implements TwoFactorEmailTemplateProvider {
 
     @Override
-    public EmailTemplate buildCodeEmail(BaseUser user, String code, int expiresInMinutes) {
+    public EmailTemplate buildCodeEmail(User user, String code, int expiresInMinutes) {
         String subject = "Seu código de verificação";
 
         String html = """
@@ -925,28 +925,30 @@ public class CustomTwoFactorEmailTemplateProvider implements TwoFactorEmailTempl
 
 ---
 
-#### 7. UserFactoryInterface
+#### 7. UserAdditionalFieldsValidator
 
-**Interface**: `br.com.seedgrid.security.spi.UserFactoryInterface`
+**Interface**: `br.com.seedgrid.security.spi.UserAdditionalFieldsValidator`
 
-**Propósito**: Factory para criar novas instâncias de usuário.
+**Propósito**: Validar os campos próprios da aplicação guardados em `User.additionalAttributes`
+(coluna `users.additional_attributes`, `jsonb`). Desde o security `2026.09.25` o `User` é concreto: não
+existe mais subclasse de usuário nem `UserFactoryInterface`.
 
-**Default Bean**: ✅ `UserFactory`
+**Default Bean**: ✅ `DefaultUserAdditionalFieldsValidator` (sem regras)
 
 **Métodos**:
-- `BaseUser newUser()`
+- `void validate(User user, Map<String, JsonNode> additionalAttributes)` — recebe o mapa final (no
+  `PATCH`, já mesclado); lance `InvalidUserAdditionalAttributesException` para rejeitar (HTTP 400).
 
 **Exemplo de Implementação**:
 ```java
 @ApplicationScoped
-@Alternative
-@Priority(1)
-public class CustomUserFactory implements UserFactoryInterface {
+public class DepartamentoObrigatorioValidator implements UserAdditionalFieldsValidator {
 
     @Override
-    public BaseUser newUser() {
-        // Retornar sua classe customizada que estende BaseUser
-        return new CustomUser();
+    public void validate(User user, Map<String, JsonNode> additionalAttributes) {
+        if (additionalAttributes == null || !additionalAttributes.containsKey("departamento")) {
+            throw new InvalidUserAdditionalAttributesException("departamento e obrigatorio");
+        }
     }
 }
 ```
@@ -2215,7 +2217,7 @@ docker-compose up -d postgres mongodb
 | `TwoFactorStrategy` (EMAIL) | `EmailTwoFactorStrategy` | ✅ SIM |
 | `TwoFactorStrategy` (TOTP) | `TotpTwoFactorStrategy` | ✅ SIM |
 | `TwoFactorEmailTemplateProvider` | `DefaultTwoFactorEmailTemplateProvider` | ✅ SIM |
-| `UserFactoryInterface` | `UserFactory` | ✅ SIM |
+| `UserAdditionalFieldsValidator` | `DefaultUserAdditionalFieldsValidator` | ✅ SIM |
 
 ---
 
