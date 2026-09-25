@@ -393,7 +393,6 @@ quarkus.hibernate-orm.database.generation=none
 **O que é:** Define como o Hibernate converte nomes de classes e campos Java para nomes de tabelas e colunas SQL.
 
 **Com `CamelCaseToUnderscoresNamingStrategy`:**
-- Classe `BaseUser` → tabela `base_user`
 - Campo `emailConfirmedAt` → coluna `email_confirmed_at`
 - Campo `changePasswordRequired` → coluna `change_password_required`
 
@@ -429,13 +428,13 @@ quarkus.hibernate-orm.dialect=org.hibernate.dialect.PostgreSQLDialect
 
 **Por que é obrigatório aqui:** Em projetos Quarkus simples com apenas um persistence unit, o Hibernate varre automaticamente todo o classpath. Mas quando existem **múltiplos persistence units** (como neste módulo que gerencia seu próprio PU de auditoria), é obrigatório declarar explicitamente os pacotes de cada PU.
 
-**Se você implementou `UserFactoryInterface` com uma entidade customizada:** Adicione o pacote da sua entidade aqui separado por vírgula.
+**Se o seu projeto tem entidades próprias:** Adicione o pacote delas aqui separado por vírgula. (Campos extras do usuário não precisam de entidade: vão em `additionalAttributes` — ver seção 17.4.)
 
 ```properties
 # Apenas o módulo de segurança:
 quarkus.hibernate-orm.packages=br.com.seedgrid.security.entities
 
-# Com entidade customizada no host:
+# Com entidades próprias do host:
 quarkus.hibernate-orm.packages=br.com.seedgrid.security.entities,br.com.minha-empresa.entities
 ```
 
@@ -2715,7 +2714,7 @@ USUÁRIO                          BACKEND                          ADMIN
    │                                │                   Admin aprova│
    │                                │ ←─────────────────────────── │
    │                                │                               │
-   │                                │ Cria BaseUser                 │
+   │                                │ Cria User                     │
    │                                │ status: APPROVED              │
    │                                │ role: default-role            │
    │                                │                               │
@@ -2766,7 +2765,7 @@ ADMIN                            BACKEND                          CONVIDADO
   │                                 │
   │ Admin aprova                    │
   │───────────────────────────────→ │
-  │                                 │ Cria BaseUser ✓                 │
+  │                                 │ Cria User ✓                     │
   │                                 │ Envia e-mail de aprovação       │
   │                                 │ ──────────────────────────────→ │
 ```
@@ -2837,14 +2836,14 @@ O módulo usa o padrão CDI `@DefaultBean`: toda implementação padrão é marc
 
 ```java
 public interface TemplateSecurityProvider {
-    String emailConfirmation(BaseUser user, String confirmationLink);
-    String passwordReset(BaseUser user, String resetLink);
-    String entryRequestConfirmation(BaseUser user, String confirmationLink);
-    String entryRequestConfirmationCode(BaseUser user, String code, int expiresInMinutes);
-    String entryRequestInvitation(BaseUser user, String invitationLink, int expiresInHours, String invitedBy);
-    String entryRequestApproved(BaseUser user, String loginLink);
-    String welcomeEmail(BaseUser user, String temporaryPassword, String confirmationLink);
-    String twoFactorCode(BaseUser user, String code, int expiresInMinutes);
+    String emailConfirmation(User user, String confirmationLink);
+    String passwordReset(User user, String resetLink);
+    String entryRequestConfirmation(User user, String confirmationLink);
+    String entryRequestConfirmationCode(User user, String code, int expiresInMinutes);
+    String entryRequestInvitation(User user, String invitationLink, int expiresInHours, String invitedBy);
+    String entryRequestApproved(User user, String loginLink);
+    String welcomeEmail(User user, String temporaryPassword, String confirmationLink);
+    String twoFactorCode(User user, String code, int expiresInMinutes);
 }
 ```
 
@@ -2857,7 +2856,7 @@ public class MeuTemplateProvider implements TemplateSecurityProvider {
     Template boasVindasTemplate;
 
     @Override
-    public String welcomeEmail(BaseUser user, String temporaryPassword, String confirmationLink) {
+    public String welcomeEmail(User user, String temporaryPassword, String confirmationLink) {
         return boasVindasTemplate
             .data("nome", user.getName())
             .data("email", user.getEmail())
@@ -2881,12 +2880,12 @@ public class MeuTemplateProvider implements TemplateSecurityProvider {
 
 ```java
 public interface JwtTokenCustomizer {
-    Map<String, Object> customizeClaims(BaseUser user, List<String> roles, String hostHeader);
+    Map<String, Object> customizeClaims(User user, List<String> roles, String hostHeader);
 }
 ```
 
 **Parâmetros:**
-- `user`: o usuário que está fazendo login — você tem acesso a todos os campos de `BaseUser`
+- `user`: o usuário que está fazendo login — você tem acesso a todos os campos de `User` (inclusive `additionalAttributes`)
 - `roles`: lista de nomes das roles do usuário
 - `hostHeader`: o valor do header HTTP `Host` da requisição — útil para identificar o tenant em sistemas multi-tenant (ex: `empresa-a.app.com.br`)
 
@@ -2899,7 +2898,7 @@ public class TenantJwtCustomizer implements JwtTokenCustomizer {
     TenantService tenantService;
 
     @Override
-    public Map<String, Object> customizeClaims(BaseUser user, List<String> roles, String hostHeader) {
+    public Map<String, Object> customizeClaims(User user, List<String> roles, String hostHeader) {
         String tenantId = tenantService.resolveFromHost(hostHeader);
         String plano = tenantService.getPlano(tenantId);
 
@@ -2950,102 +2949,115 @@ public class TenantJwtValidator implements JwtTokenValidator {
 
 ---
 
-### 17.4 `UserFactoryInterface` ⭐ A mais importante
+### 17.4 `UserAdditionalFieldsValidator` + `additionalAttributes` ⭐ Campos próprios do usuário
 
-**Propósito:** Permite que o seu projeto defina uma subclasse de `BaseUser` com campos extras. Sem isso, todos os usuários terão apenas os campos básicos: `email`, `name`, `whatsApp`, `roles`, etc. Com essa SPI, você adiciona `cpf`, `departamento`, `dataNascimento` — qualquer campo que sua aplicação precisar.
+**Propósito:** Guardar campos específicos da sua aplicação no usuário — `cpf`, `departamento`,
+`dataNascimento`, preferências — **sem** criar subclasse de entidade nem migration de colunas.
 
-```java
-public interface UserFactoryInterface {
-    BaseUser newUser();
+A partir do security `2026.09.25`, `User` é uma entidade **concreta** (não existe mais `BaseUser` nem
+`UserFactoryInterface`). Os campos da aplicação vão em `additionalAttributes`
+(`Map<String, JsonNode>`), gravado na coluna `users.additional_attributes` (`jsonb`, migration `V232`
+do módulo).
+
+#### Passo 1 — Envie os campos na API
+
+`POST /users`:
+
+```json
+{
+  "email": "ana@empresa.com",
+  "name": "Ana Silva",
+  "roleIds": [1],
+  "additionalAttributes": {
+    "cpf": "123.456.789-00",
+    "departamento": "Financeiro",
+    "preferencias": { "tema": "escuro" }
+  }
 }
 ```
 
-#### Passo a passo completo
+As respostas de `/users` sempre trazem `additionalAttributes` (`{}` quando vazio).
 
-**Passo 1 — Crie sua entidade:**
+`PATCH /users/{publicId}` faz **merge** (JSON Merge Patch — RFC 7386): chaves ausentes são
+preservadas, objetos são mesclados, arrays são substituídos e `null` remove a chave:
 
-```java
-// src/main/java/br/com/minhaempresa/entities/ApplicationUser.java
-package br.com.minhaempresa.entities;
-
-import br.com.seedgrid.security.entities.BaseUser;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-
-@Entity
-@Table(name = "users")  // MESMA tabela do BaseUser — herança de tabela única (SINGLE_TABLE)
-public class ApplicationUser extends BaseUser {
-
-    @Column(length = 14)
-    private String cpf;
-
-    @Column(length = 20)
-    private String telefone;
-
-    @Column(length = 100)
-    private String departamento;
-
-    // getters e setters...
-}
+```json
+{ "additionalAttributes": { "preferencias": { "tema": "claro" }, "cpf": null } }
 ```
 
-> **Por que `@Table(name = "users")`?** O Hibernate usa estratégia SINGLE_TABLE por padrão na herança. Todos os campos (de `BaseUser` e de `ApplicationUser`) ficam na mesma tabela `users`. Isso é o mais simples — sem JOINs extras.
+#### Passo 2 — Valide as regras da sua aplicação
 
-**Passo 2 — Implemente a factory:**
+A implementação padrão (`DefaultUserAdditionalFieldsValidator`) não impõe regras. Para validar, crie um
+bean `@ApplicationScoped` (sem `@DefaultBean` — ele substitui o padrão):
 
 ```java
-// src/main/java/br/com/minhaempresa/security/ApplicationUserFactory.java
+// src/main/java/br/com/minhaempresa/security/AppUserAttributesValidator.java
 package br.com.minhaempresa.security;
 
-import br.com.minhaempresa.entities.ApplicationUser;
-import br.com.seedgrid.security.entities.BaseUser;
-import br.com.seedgrid.security.spi.UserFactoryInterface;
+import java.util.Map;
+import java.util.Set;
+
+import com.fasterxml.jackson.databind.JsonNode;
+
+import br.com.seedgrid.security.entities.User;
+import br.com.seedgrid.security.exceptions.InvalidUserAdditionalAttributesException;
+import br.com.seedgrid.security.spi.UserAdditionalFieldsValidator;
 import jakarta.enterprise.context.ApplicationScoped;
 
-@ApplicationScoped   // ← sem @DefaultBean: substitui o padrão
-public class ApplicationUserFactory implements UserFactoryInterface {
+@ApplicationScoped
+public class AppUserAttributesValidator implements UserAdditionalFieldsValidator {
+
+    private static final Set<String> PERMITIDOS = Set.of("cpf", "departamento", "preferencias");
 
     @Override
-    public BaseUser newUser() {
-        return new ApplicationUser();
-        // O módulo vai chamar newUser() sempre que precisar criar um usuário.
-        // Como retornamos ApplicationUser, todos os campos extras existem.
+    public void validate(User user, Map<String, JsonNode> atributos) {
+        if (atributos == null) {
+            return;
+        }
+        for (String chave : atributos.keySet()) {
+            if (!PERMITIDOS.contains(chave)) {
+                throw new InvalidUserAdditionalAttributesException("Atributo nao permitido: " + chave);
+            }
+        }
+        JsonNode cpf = atributos.get("cpf");
+        if (cpf != null && !cpf.asText().matches("\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}")) {
+            throw new InvalidUserAdditionalAttributesException("cpf invalido");
+        }
     }
 }
 ```
 
-**Passo 3 — Registre o pacote da entidade:**
+O validador recebe o mapa **final** (no PATCH, já mesclado). `InvalidUserAdditionalAttributesException`
+vira **HTTP 400** e nada é gravado. Antes dele, o módulo aplica limites configuráveis:
 
 ```properties
-# Inclua SEU pacote além do pacote do módulo
-quarkus.hibernate-orm.packages=br.com.seedgrid.security.entities,br.com.minhaempresa.entities
+seedgrid.security.user.additional-attributes.max-size-bytes=16384
+seedgrid.security.user.additional-attributes.max-depth=5
+seedgrid.security.user.additional-attributes.max-keys=100
 ```
 
-**Passo 4 — Crie a migration Flyway:**
-
-```sql
--- src/main/resources/db/migration/V2__add_user_custom_fields.sql
-ALTER TABLE users ADD COLUMN cpf VARCHAR(14);
-ALTER TABLE users ADD COLUMN telefone VARCHAR(20);
-ALTER TABLE users ADD COLUMN departamento VARCHAR(100);
-```
-
-**Passo 5 — Acesse os campos customizados:**
+#### Passo 3 — Leia os campos no seu código
 
 ```java
 @Inject
 UserRepository userRepository;
 
 public void exemplo(String publicId) {
-    // O repositório retorna BaseUser, mas na verdade é ApplicationUser
-    ApplicationUser user = (ApplicationUser) userRepository.findByPublicId(publicId);
-    String cpf = user.getCpf();
-    String depto = user.getDepartamento();
+    User user = userRepository.findByPublicId(publicId).orElseThrow();
+    JsonNode cpf = user.getAdditionalAttributes().get("cpf");
+    String departamento = user.getAdditionalAttributes().get("departamento").asText();
 }
 ```
 
-**Campos já disponíveis em `BaseUser` (não precisa adicionar):**
+Para filtrar por atributo, use SQL nativo (`additional_attributes->>'departamento' = :dep`) e, se for
+filtro frequente, crie um índice de expressão ou GIN numa migration da sua aplicação.
+
+> **Vindo da versão antiga (subclasse de `BaseUser` + `UserFactoryInterface`)?** Troque os imports
+> `BaseUser*` → `User*`, remova a subclasse e a factory, e mova os dados das colunas próprias para
+> `additional_attributes` numa migration. O passo a passo com SQL está no `docs/USAGE.md` do
+> `seedgrid-quarkus-ext-security`.
+
+**Campos já disponíveis em `User` (não precisa adicionar):**
 
 | Campo | Tipo | Descrição |
 |---|---|---|
@@ -3057,10 +3069,11 @@ public void exemplo(String publicId) {
 | `companies` | `List<Company>` | Empresas vinculadas |
 | `isRoot` | `boolean` | Usuário raiz (admin supremo) |
 | `changePasswordRequired` | `boolean` | Deve trocar a senha |
-| `passwordExpiresAt` | `LocalDateTime` | Quando a senha expira |
-| `emailConfirmedAt` | `LocalDateTime` | Quando o e-mail foi confirmado |
+| `passwordExpiresAt` | `Instant` | Quando a senha expira |
+| `emailConfirmedAt` | `Instant` | Quando o e-mail foi confirmado |
 | `twoFactorEnabled` | `boolean` | 2FA habilitado |
-| `twoFactorPrimaryMethod` | `String` | Método 2FA ativo (`EMAIL` ou `TOTP`) |
+| `twoFactorPrimaryMethod` | `String` | Método 2FA ativo (`EMAIL`, `TOTP` ou `WHATSAPP`) |
+| `additionalAttributes` | `Map<String, JsonNode>` | Campos próprios da aplicação (jsonb) |
 | `publicId` | `String` (UUID) | Identificador público (herdado de `BaseEntity`) |
 
 ---
@@ -3072,9 +3085,9 @@ public void exemplo(String publicId) {
 ```java
 public interface TwoFactorStrategy {
     String getMethodCode();       // Código único: "WHATSAPP", "SMS", etc.
-    boolean canInitiate(BaseUser user);  // Quais pré-condições o usuário precisa ter?
-    TwoFactorInitResult initiate(BaseUser user, TwoFactorContext context);  // Inicia o 2FA (envia o código)
-    TwoFactorVerifyResult verify(BaseUser user, String code, TwoFactorContext context);  // Verifica o código
+    boolean canInitiate(User user);  // Quais pré-condições o usuário precisa ter?
+    TwoFactorInitResult initiate(User user, TwoFactorContext context);  // Inicia o 2FA (envia o código)
+    TwoFactorVerifyResult verify(User user, String code, TwoFactorContext context);  // Verifica o código
 }
 ```
 
@@ -3095,13 +3108,13 @@ public class WhatsAppTwoFactorStrategy implements TwoFactorStrategy {
     }
 
     @Override
-    public boolean canInitiate(BaseUser user) {
+    public boolean canInitiate(User user) {
         // O usuário só pode usar este método se tiver WhatsApp cadastrado
         return user.getWhatsApp() != null && !user.getWhatsApp().isBlank();
     }
 
     @Override
-    public TwoFactorInitResult initiate(BaseUser user, TwoFactorContext context) {
+    public TwoFactorInitResult initiate(User user, TwoFactorContext context) {
         // Gera código de 6 dígitos
         String code = String.format("%06d", new SecureRandom().nextInt(1_000_000));
 
@@ -3117,7 +3130,7 @@ public class WhatsAppTwoFactorStrategy implements TwoFactorStrategy {
     }
 
     @Override
-    public TwoFactorVerifyResult verify(BaseUser user, String code, TwoFactorContext context) {
+    public TwoFactorVerifyResult verify(User user, String code, TwoFactorContext context) {
         String cacheKey = "2fa:whatsapp:" + user.getPublicId();
         String stored = cache.get(cacheKey);
 
@@ -3144,9 +3157,9 @@ seedgrid.security.2f.allowed-methods=EMAIL,TOTP,WHATSAPP
 
 ```java
 public interface EmailServiceInterface {
-    void sendEmailConfirmation(BaseUser user, String confirmationToken);
-    void sendPasswordReset(BaseUser user, String resetToken);
-    void sendWelcomeEmail(BaseUser user, String temporaryPassword, String confirmationToken);
+    void sendEmailConfirmation(User user, String confirmationToken);
+    void sendPasswordReset(User user, String resetToken);
+    void sendWelcomeEmail(User user, String temporaryPassword, String confirmationToken);
     void sendHtmlEmail(String to, String subject, String htmlBody, String textBody);
     String generateToken();  // Gera o token único (por padrão: UUID.randomUUID().toString())
 }
@@ -3167,7 +3180,7 @@ public class SendGridEmailService implements EmailServiceInterface {
     SecurityLinkBuilder links;
 
     @Override
-    public void sendWelcomeEmail(BaseUser user, String temporaryPassword, String confirmationToken) {
+    public void sendWelcomeEmail(User user, String temporaryPassword, String confirmationToken) {
         String confirmationLink = links.buildEmailConfirmationLink(confirmationToken);
         String html = templates.welcomeEmail(user, temporaryPassword, confirmationLink);
         sendHtmlEmail(user.getEmail(), "Bem-vindo!", html, null);
@@ -3197,7 +3210,7 @@ public class SendGridEmailService implements EmailServiceInterface {
 
 ```java
 public interface TwoFactorEmailTemplateProvider {
-    EmailTemplate buildCodeEmail(BaseUser user, String code, int expiresInMinutes);
+    EmailTemplate buildCodeEmail(User user, String code, int expiresInMinutes);
 
     class EmailTemplate {
         // subject: assunto do e-mail
@@ -3214,7 +3227,7 @@ public interface TwoFactorEmailTemplateProvider {
 public class Meu2FATemplate implements TwoFactorEmailTemplateProvider {
 
     @Override
-    public EmailTemplate buildCodeEmail(BaseUser user, String code, int expiresInMinutes) {
+    public EmailTemplate buildCodeEmail(User user, String code, int expiresInMinutes) {
         String subject = "Código de Acesso — MinhaApp";
         String html = """
             <h2>Olá, %s!</h2>
@@ -3298,7 +3311,7 @@ Se você não solicitou este acesso, ignore esta mensagem.
 
 | Variável | Valor substituído |
 |---|---|
-| `{name}` | Nome do usuário (campo `name` do `BaseUser`) |
+| `{name}` | Nome do usuário (campo `name` do `User`) |
 | `{code}` | Código numérico de 6 dígitos gerado para esta sessão |
 | `{expiresInMinutes}` | Tempo de validade em minutos (derivado de `seedgrid.security.2f.whatsapp.code-ttl`) |
 
@@ -3368,7 +3381,7 @@ quarkus.datasource.jdbc.max-size=10
 
 quarkus.hibernate-orm.database.generation=none
 quarkus.hibernate-orm.physical-naming-strategy=org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
-# Inclua seu pacote de entidades se usar UserFactoryInterface:
+# Inclua o pacote das entidades próprias do host, se houver:
 quarkus.hibernate-orm.packages=br.com.seedgrid.security.entities
 
 # ============================================================
@@ -3627,7 +3640,7 @@ Use este checklist para confirmar que a configuração está funcionando correta
 - [ ] `DELETE /users/{publicId}/avatar` reseta para avatar padrão
 
 ### Customização (se aplicável)
-- [ ] `UserFactoryInterface` implementada: campos extras persistem no banco
+- [ ] Campos próprios em `additionalAttributes` (e `UserAdditionalFieldsValidator`, se houver regras) persistem e voltam em `GET /users/{publicId}`
 - [ ] Template de e-mail customizado em `templates/security/`: e-mails usam o template do host
 - [ ] `JwtTokenCustomizer` implementado: claims extras aparecem no JWT decodificado
 

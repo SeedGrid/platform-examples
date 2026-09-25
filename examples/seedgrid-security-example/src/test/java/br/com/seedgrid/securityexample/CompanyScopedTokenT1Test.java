@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 
-import br.com.seedgrid.security.entities.BaseUser;
+import br.com.seedgrid.security.entities.User;
 import br.com.seedgrid.security.entities.Company;
 import br.com.seedgrid.security.entities.Permission;
 import br.com.seedgrid.security.entities.Role;
@@ -68,7 +68,7 @@ class CompanyScopedTokenT1Test {
 
     private Seed seedData() {
         // Idempotente: se ja semeado por um teste anterior, reusa.
-        Long existing = (Long) em.createQuery("SELECT COUNT(u) FROM BaseUser u WHERE u.email = :e")
+        Long existing = (Long) em.createQuery("SELECT COUNT(u) FROM User u WHERE u.email = :e")
                 .setParameter("e", EMAIL).getSingleResult();
         if (existing != null && existing > 0) {
             return loadSeed();
@@ -92,7 +92,7 @@ class CompanyScopedTokenT1Test {
         em.persist(b);
         em.persist(c);
 
-        BaseUser user = new BaseUser();
+        User user = new User();
         String publicId = UUID.randomUUID().toString();
         user.setUserPublicId(publicId);
         user.setEmail(EMAIL);
@@ -112,7 +112,7 @@ class CompanyScopedTokenT1Test {
     }
 
     private Seed loadSeed() {
-        BaseUser user = (BaseUser) em.createQuery("SELECT u FROM BaseUser u WHERE u.email = :e")
+        User user = (User) em.createQuery("SELECT u FROM User u WHERE u.email = :e")
                 .setParameter("e", EMAIL).getSingleResult();
         Company a = companyByCnpj("11111111000111");
         Company b = companyByCnpj("22222222000122");

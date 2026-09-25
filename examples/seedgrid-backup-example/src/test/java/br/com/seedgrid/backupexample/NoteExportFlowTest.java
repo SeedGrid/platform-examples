@@ -16,8 +16,8 @@ import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import br.com.seedgrid.security.entities.BaseUser;
-import br.com.seedgrid.security.repositories.BaseUserRepository;
+import br.com.seedgrid.security.entities.User;
+import br.com.seedgrid.security.repositories.UserRepository;
 import io.quarkus.narayana.jta.QuarkusTransaction;
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
@@ -49,7 +49,7 @@ class NoteExportFlowTest {
     private static final Duration POLL_INTERVAL = Duration.ofMillis(250);
 
     @Inject
-    BaseUserRepository userRepository;
+    UserRepository userRepository;
 
     @BeforeEach
     void confirmBootstrapAdminEmail() {
@@ -57,7 +57,7 @@ class NoteExportFlowTest {
         // NAO confirmado e changePasswordRequired=true; confirmamos direto no banco pra poder
         // logar no teste (fluxo real exigiria clicar no link do e-mail de boas-vindas).
         QuarkusTransaction.requiringNew().run(() -> {
-            BaseUser admin = userRepository.findByEmail(ADMIN_EMAIL).orElseThrow();
+            User admin = userRepository.findByEmail(ADMIN_EMAIL).orElseThrow();
             admin.confirmEmail();
             admin.clearChangePasswordRequired();
         });

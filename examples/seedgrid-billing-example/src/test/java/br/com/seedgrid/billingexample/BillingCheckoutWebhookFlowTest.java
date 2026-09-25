@@ -26,8 +26,8 @@ import org.junit.jupiter.api.Order;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import br.com.seedgrid.billingexample.billing.FakeBillingProvider;
-import br.com.seedgrid.security.entities.BaseUser;
-import br.com.seedgrid.security.repositories.BaseUserRepository;
+import br.com.seedgrid.security.entities.User;
+import br.com.seedgrid.security.repositories.UserRepository;
 import io.quarkus.narayana.jta.QuarkusTransaction;
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
@@ -55,7 +55,7 @@ class BillingCheckoutWebhookFlowTest {
     private static final String WEBHOOK_SECRET = "test-fake-webhook-secret";
 
     @Inject
-    BaseUserRepository userRepository;
+    UserRepository userRepository;
 
     @Inject
     DataSource dataSource;
@@ -67,7 +67,7 @@ class BillingCheckoutWebhookFlowTest {
         // O FirstAdminBootstrapService (seedgrid-security) cria o primeiro admin com o e-mail NAO
         // confirmado; confirmamos direto no banco pra poder logar no teste (ver pegadinha #9).
         QuarkusTransaction.requiringNew().run(() -> {
-            BaseUser admin = userRepository.findByEmail(ADMIN_EMAIL).orElseThrow();
+            User admin = userRepository.findByEmail(ADMIN_EMAIL).orElseThrow();
             admin.confirmEmail();
             admin.clearChangePasswordRequired();
         });

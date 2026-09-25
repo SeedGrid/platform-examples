@@ -9,8 +9,8 @@ import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import br.com.seedgrid.security.entities.BaseUser;
-import br.com.seedgrid.security.repositories.BaseUserRepository;
+import br.com.seedgrid.security.entities.User;
+import br.com.seedgrid.security.repositories.UserRepository;
 import io.quarkus.narayana.jta.QuarkusTransaction;
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
@@ -35,7 +35,7 @@ class ApiKeyReportAccessTest {
     private static final String ADMIN_PASSWORD = "Admin@12345";
 
     @Inject
-    BaseUserRepository userRepository;
+    UserRepository userRepository;
 
     @BeforeEach
     void confirmBootstrapAdminEmail() {
@@ -43,7 +43,7 @@ class ApiKeyReportAccessTest {
         // NAO confirmado (fluxo real exige clicar no link do e-mail de boas-vindas); confirmamos
         // direto no banco pra poder logar no teste.
         QuarkusTransaction.requiringNew().run(() -> {
-            BaseUser admin = userRepository.findByEmail(ADMIN_EMAIL).orElseThrow();
+            User admin = userRepository.findByEmail(ADMIN_EMAIL).orElseThrow();
             admin.confirmEmail();
             admin.clearChangePasswordRequired();
         });

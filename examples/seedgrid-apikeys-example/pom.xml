@@ -66,11 +66,11 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- SeedGrid: apikeys nao roda standalone, depende hard-code de security (BaseUser/Role/RBAC) -->
+        <!-- SeedGrid: apikeys nao roda standalone, depende hard-code de security (User/Role/RBAC) -->
         <dependency>
             <groupId>br.com.seedgrid</groupId>
             <artifactId>seedgrid-security</artifactId>
-            <version>2026.07.08</version>
+            <version>2026.09.25</version>
         </dependency>
         <!-- Provider de auditoria (backend JPA). O host final escolhe o provider;
              as libs (security/tenancy/backup) trazem apenas o audit-core. -->
@@ -83,7 +83,7 @@
         <dependency>
             <groupId>br.com.seedgrid</groupId>
             <artifactId>seedgrid-apikeys</artifactId>
-            <version>2026.07.08</version>
+            <version>2026.09.25</version>
         </dependency>
 
         <dependency>

@@ -167,7 +167,7 @@ Swagger UI: http://localhost:8088/q/swagger-ui.
 - Para resolver a *company* do usuário logado num endpoint próprio (`GET /api/subscriptions/me`),
   basta injetar `br.com.seedgrid.security.services.CompanyRequestContext` e ler
   `getCurrentCompanyId()` — já vem populado pelo `CompanyContextFilter` do `seedgrid-security` a
-  partir da claim `companyId` do JWT (não precisa resolver `BaseUser` → `Company` manualmente).
+  partir da claim `companyId` do JWT (não precisa resolver `User` → `Company` manualmente).
 - `seedgrid-billing-core` traz `seedgrid-resilience-core` como dependência transitiva (usa
   `@SeedGridRateLimit` nos próprios endpoints de checkout/portal/webhook) — não precisou adicionar
   nada no `pom.xml` deste exemplo além do `seedgrid-billing-core`, o Maven resolveu offline.

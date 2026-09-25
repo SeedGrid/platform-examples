@@ -5,7 +5,7 @@ App de exemplo, rodável, do `seedgrid-apikeys`: autenticação **machine-to-mac
 via JWT.
 
 `seedgrid-apikeys` **não roda standalone** — depende hard-code de `seedgrid-security` (a chave é
-sempre atrelada a um `BaseUser` dono e a uma `Role`; as permissões efetivas da chave vêm 100% da
+sempre atrelada a um `User` dono e a uma `Role`; as permissões efetivas da chave vêm 100% da
 role, não há "scopes" próprios por chave).
 
 ## O princípio central: API key = Role, não dono
