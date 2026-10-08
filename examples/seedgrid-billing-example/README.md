@@ -1,176 +1,175 @@
 # seedgrid-billing-example
 
-App de exemplo, rodável, do `seedgrid-billing-core`: checkout, webhook e assinatura por company,
-usando um `FakeBillingProvider` próprio (sem Stripe de verdade — o `seedgrid-billing-stripe`
-existe pronto para produção, mas não é o foco didático aqui).
+App de exemplo, rodável, do `seedgrid-billing-core`: um "produto" mínimo (gerar relatórios) cobrado por
+assinatura, com trial, plano pago, checkout, webhook, franquia por **contador de uso** e funcionalidade por
+plano. O gateway é um `FakeBillingProvider` próprio, para rodar sem Stripe. Em produção, use o
+`seedgrid-billing-stripe`, que implementa as mesmas interfaces sem nenhum código no host.
 
-`seedgrid-billing-core` **não roda standalone** — depende hard-code de `seedgrid-security` (os
-próprios endpoints `/billing/checkout` e `/billing/portal` são protegidos por
-`@PermissionsAllowed`, RBAC do security).
+É a **referência mínima**. A demonstração completa, com telas, planos semeados e **dois contadores** (um
+contado pela anotação e outro pelo código), está nos boilerplates `login-tenancy` e `subdomain-tenancy`.
 
-## O que o `seedgrid-billing-core` faz (e o que não faz)
+`seedgrid-billing-core` **não roda sozinho**: depende do `seedgrid-security` (usuários, empresas, RBAC dos
+próprios endpoints).
 
-- Faz: expõe `POST /billing/checkout`, `POST /billing/portal` e `POST /public/billing/webhook`
-  prontos; persiste `BillingEventEntity` (tabela `billing_events`) para idempotência de webhook
-  (`unique(provider, event_id)`); define a SPI `BillingProvider` (que você implementa) e
-  `BillingEventHandler` (que a app host implementa para reagir aos eventos).
-- Não faz: não modela Plano nem Assinatura — isso é responsabilidade da app host. Este exemplo
-  cria as entidades `Plan` e `Subscription` você mesmo.
+## O que é da extension e o que é do produto
 
-## O princípio central: o provider é um adaptador, o handler é o dono do domínio
+| | `seedgrid-billing-core` | Este produto |
+|---|---|---|
+| Plano, term (preço, vigência, vagas, permissões), trial, assinatura, ciclo | tudo | nada |
+| Checkout, portal, webhook, faturas, troca de plano | tudo | nada |
+| **Quais contadores de uso existem** | junta e valida | declara (`ReportUsageMeters`) |
+| **O que é 1 unidade e quando contar** | — | `@ConsumesUsage(meter = "reports")` |
+| Franquia e preço do excedente de cada contador, por plano | guarda e cobra | só semeia a cota do trial |
+| Bloqueio 402 (sem assinatura, trial vencido, fora do plano, franquia esgotada) | tudo | nada |
+| Funcionalidade por plano | `@RequiresPlanFeature` | a permissão `REPORT_EXPORT` |
+| Gateway | interfaces | `FakeBillingProvider` (só no exemplo) |
 
-- `FakeBillingProvider` (`BillingProvider`) — adaptador do "gateway" fake: cria checkout/portal
-  (URLs locais não navegáveis de verdade) e verifica/parseia o webhook. Não sabe nada de
-  `Plan`/`Subscription`.
-- `SubscriptionBillingEventHandler` (`BillingEventHandler`) — dono do domínio: ao receber um
-  evento canônico (`CHECKOUT_COMPLETED`/`SUBSCRIPTION_CREATED`/`SUBSCRIPTION_CANCELED`), cria/ativa
-  ou cancela a `Subscription` da `Company` referenciada.
+O código do produto é pequeno de propósito:
 
-## Formato do webhook fake
+- `product/ReportUsageMeters.java`: declara o contador `reports`.
+- `product/ReportResource.java`: `POST /api/reports` consome 1 relatório; `GET /api/reports/export` só abre
+  se o plano liberar `REPORT_EXPORT`.
+- `db/migration/app/V1000__product_billing_seed.sql`: a permissão `REPORT_EXPORT` e a cota do trial
+  (3 relatórios).
 
-Como não existe Stripe de verdade aqui, o formato do payload é **definido por este exemplo**
-(`FakeWebhookPayload`), assinado por um HMAC-SHA256 simples no header `x-fake-signature`
-(segredo: `seedgrid.billing.fake.webhook-secret`):
+## Como estender: contadores de uso
 
-```json
-{
-  "eventId": "evt_123",
-  "type": "CHECKOUT_COMPLETED",
-  "companyId": 1,
-  "planCode": "PRO",
-  "subscriptionId": "sub_fake_abc",
-  "customerId": "cus_fake_abc",
-  "checkoutSessionId": "cs_fake_abc"
+Um **contador** é o que o produto cobra por uso: relatórios, requisições, MB armazenados, notas emitidas. O
+produto diz quais existem e quando contar. O billing guarda, por plano, a **franquia** (quanto está
+incluído) e o **preço do excedente** (quanto custa cada unidade além dela), e faz o resto.
+
+### 1. Declare os contadores
+
+```java
+@ApplicationScoped
+public class ReportUsageMeters implements UsageMeterContributor {
+    public static final String REPORTS = "reports";
+
+    @Override
+    public List<UsageMeterDefinition> meters() {
+        return List.of(new UsageMeterDefinition(REPORTS, "Relatorios"));
+        // outro contador = mais uma linha:
+        // new UsageMeterDefinition("storage-mb", "MB armazenados")
+    }
 }
 ```
 
-`type` é o nome exato de um `BillingEventType` (`CHECKOUT_COMPLETED`, `SUBSCRIPTION_CREATED`,
-`SUBSCRIPTION_CANCELED`, ...). `companyId` vira `BillingReference.externalReference()`;
-`planCode` vira `metadata.get("planCode")` — é assim que o `SubscriptionBillingEventHandler` sabe
-qual company/plano ativar, já que o "provider" fake não guarda estado nenhum entre o checkout e o
-webhook (quem simula o pagamento monta o payload à mão, ecoando os dados que quiser).
+- O **código** (`[a-z0-9-]`, até 40 caracteres) é a identidade do contador **para sempre**: vai para o banco,
+  para o `@ConsumesUsage` e para o nome do meter no provider. Não reaproveite o código de um contador removido
+  para outro significado, porque misturaria o histórico de cobrança dos dois.
+- O **label** é o que aparece nas telas e nas mensagens de erro.
+- Código inválido ou repetido derruba o startup.
 
-## Fluxo
+### 2. Conte
 
-1. `POST /public/auth/login` — humano loga com JWT (admin do bootstrap do `seedgrid-security`).
-2. `POST /billing/checkout` (JWT, precisa `BILLING_CHECKOUT_CREATE`) `{"planCode": "PRO",
-   "customerEmail": "...", "successUrl": "...", "cancelUrl": "..."}` — o `FakeBillingProvider` gera
-   um `checkoutSessionId` fake e uma URL local fake.
-3. `POST /public/billing/webhook` (público, header `x-fake-signature` — HMAC do body, não JWT) com
-   um payload sintético `CHECKOUT_COMPLETED` (ou `SUBSCRIPTION_CREATED`) — simula o "pagamento
-   confirmado". O `SubscriptionBillingEventHandler` cria/ativa a `Subscription` da company
-   informada.
-4. `GET /api/subscriptions/me` (qualquer usuário autenticado) — mostra o plano/assinatura ativa da
-   **company do usuário logado** (resolvida via `CompanyRequestContext`, claim `companyId` do
-   token — não precisa de permissão especial além de estar autenticado).
-5. `POST /public/billing/webhook` com um payload `SUBSCRIPTION_CANCELED` referenciando a mesma
-   `subscriptionId` — a assinatura fica `CANCELED`. `GET /api/subscriptions/me` reflete a mudança.
+Quando **uma chamada vale uma quantidade fixa**, anote o método:
 
-## Endpoints da extension (já prontos, você não precisa reimplementar)
+```java
+@POST
+@ConsumesUsage(meter = ReportUsageMeters.REPORTS)        // units = 1 por padrão
+public Map<String, Object> generate() { ... }
+```
 
-| Método | Rota | Permissão | Auth |
-|---|---|---|---|
-| `POST` | `/billing/checkout` | `BILLING_CHECKOUT_CREATE` | JWT |
-| `POST` | `/billing/portal` | `BILLING_PORTAL_CREATE` | JWT |
-| `POST` | `/public/billing/webhook` | — | assinatura HMAC (`x-fake-signature`) |
+O `meter` é obrigatório: esquecer não compila. Um código que nenhum `UsageMeterContributor` declara (ex.:
+`"reprots"`) **derruba o startup**, com o método na mensagem.
 
-## Endpoint próprio deste exemplo
+Quando **a quantidade só se conhece em runtime** (ex.: os MB de um upload), conte pelo código:
 
-| Método | Rota | Permissão | Auth |
-|---|---|---|---|
-| `GET` | `/api/subscriptions/me` | — (só autenticado) | JWT |
+```java
+Account account = currentAccountResolver.requireCurrentAccount();
+usageService.assertCanConsume(account, "storage-mb", mb);          // 402 se não puder
+// ... faz o trabalho ...
+usageService.consume(account, "storage-mb", mb, "upload-" + fileId); // chave idempotente
+```
+
+Nos dois casos: checa **antes** (o trabalho nem roda se a conta não pode consumir), contabiliza **depois**,
+só se deu certo, e dentro da transação do método (um rollback desfaz o consumo). O excedente é reportado ao
+provider **depois do commit**.
+
+### 3. Defina a franquia e o excedente por plano
+
+Pela API de admin do billing (ou pelas telas dos boilerplates). Cada plano lista os contadores que inclui:
+
+```json
+POST /admin/plans/{planId}/terms
+{
+  "monthlyPrice": 99.90,
+  "meters": [
+    { "meter": "reports", "includedUnits": 100, "overagePrice": 0.50 }
+  ],
+  "permissionPublicIds": ["<publicId de REPORT_EXPORT>"]
+}
+```
+
+- `overagePrice: 0` significa **sem excedente**: esgotou a franquia, bloqueia (402 `QUOTA_EXCEEDED`).
+- `overagePrice > 0` significa **com excedente**: não bloqueia por franquia. Cada unidade a mais é cobrada
+  pelo provider, numa linha própria da fatura por contador.
+- Um contador que **não está** no plano dá 402 `METER_NOT_IN_PLAN` ao consumir ("seu plano não inclui
+  Relatórios").
+- Um contador que o produto não declara é recusado com 400 `INVALID_PLAN_TERM_METER`.
+- A cota do trial é ajustada com `PATCH /admin/plans/trial` `{"meters": [...]}`. O trial não aceita
+  excedente.
+- `GET /admin/billing/meters` lista os contadores declarados, para as telas montarem uma linha por contador.
+
+### 4. Mostre o consumo ao cliente
+
+`GET /me/usage` traz o saldo de cada contador do ciclo (`billingCycle.meters[]`: incluído, consumido,
+excedente, restante) e, em `meterAccess.<contador>`, se 1 unidade passaria agora, com o mesmo `code` do 402
+que o consumo daria. Assim o client explica o bloqueio sem tentar. `access` diz se a **assinatura** permite
+consumir (vale para todos os contadores).
+
+### Códigos 402 de consumo
+
+| `code` | Quando |
+|---|---|
+| `NO_ACTIVE_SUBSCRIPTION` / `TRIAL_EXPIRED` | a conta não tem assinatura vigente |
+| `PAYMENT_PAST_DUE` | pagamento pendente |
+| `METER_NOT_IN_PLAN` | o plano não inclui o contador (`meter`, `label` no corpo) |
+| `QUOTA_EXCEEDED` / `TRIAL_QUOTA_EXCEEDED` | franquia do contador esgotada num plano sem excedente dele |
+
+## Fluxo de ponta a ponta
+
+É o que o `BillingCheckoutWebhookFlowTest` exercita:
+
+1. A conta nasce no **trial**, com 3 relatórios (`V1000`).
+2. `POST /api/reports` 3 vezes; na 4ª, 402 `TRIAL_QUOTA_EXCEEDED`. `GET /api/reports/export` dá 402
+   `FEATURE_NOT_IN_PLAN`.
+3. O admin cria o plano **Pro** e um term com `reports`: 100 incluídos, R$ 0,50 o excedente, liberando
+   `REPORT_EXPORT`.
+4. `POST /me/billing/checkout {"planId": "..."}`: o client manda só o plano; a extension monta o resto e
+   devolve a URL do gateway.
+5. Abrir a URL (`GET /public/fake-gateway/checkout/{id}`) "paga": o gateway fake entrega o
+   `CHECKOUT_COMPLETED` assinado ao webhook, e a assinatura Pro fica ativa com a franquia nova.
 
 ## Como rodar
 
 ```bash
-./run-dev.sh          # modo dev, carrega dev.env
-mvn test              # sobe Postgres via Testcontainers automaticamente
-```
-
-## Testando via curl
-
-```bash
-# 1. Login (admin do bootstrap — email/senha vem do dev.env / dos logs de boot)
-TOKEN=$(curl -s -X POST http://localhost:8088/public/auth/login -H 'Content-Type: application/json' \
-  -d '{"login":"admin@example.com","password":"<senha do log de boot>"}' | jq -r .token)
-
-# 2. Cria um checkout para o plano PRO
-curl -s -X POST http://localhost:8088/billing/checkout -H "Authorization: Bearer $TOKEN" \
-  -H 'Content-Type: application/json' \
-  -d '{"planCode":"PRO","customerEmail":"admin@example.com","successUrl":"http://localhost/ok","cancelUrl":"http://localhost/cancel"}'
-
-# 3. Descubra o companyId da company default (ou consulte GET /me/companies com o TOKEN)
-#    Neste exemplo com 1 unica company, normalmente e o id 1.
-
-# 4. Monta o payload e assina com HMAC-SHA256 (segredo: dev-fake-webhook-secret)
-BODY='{"eventId":"evt_1","type":"CHECKOUT_COMPLETED","companyId":1,"planCode":"PRO","subscriptionId":"sub_fake_1","customerId":"cus_fake_1"}'
-SIG=$(printf '%s' "$BODY" | openssl dgst -sha256 -hmac "dev-fake-webhook-secret" | sed 's/^.* //')
-
-curl -i -X POST http://localhost:8088/public/billing/webhook \
-  -H "Content-Type: application/json" -H "x-fake-signature: $SIG" -d "$BODY"
-
-# 5. Ve a assinatura ativa
-curl http://localhost:8088/api/subscriptions/me -H "Authorization: Bearer $TOKEN"
-
-# 6. Cancela (novo payload, SUBSCRIPTION_CANCELED, mesma subscriptionId, assinatura recalculada)
-BODY2='{"eventId":"evt_2","type":"SUBSCRIPTION_CANCELED","companyId":1,"planCode":"PRO","subscriptionId":"sub_fake_1","customerId":"cus_fake_1"}'
-SIG2=$(printf '%s' "$BODY2" | openssl dgst -sha256 -hmac "dev-fake-webhook-secret" | sed 's/^.* //')
-curl -i -X POST http://localhost:8088/public/billing/webhook \
-  -H "Content-Type: application/json" -H "x-fake-signature: $SIG2" -d "$BODY2"
-
-curl http://localhost:8088/api/subscriptions/me -H "Authorization: Bearer $TOKEN"
+./run-dev.sh          # modo dev, carrega dev.env (porta 8088)
+mvn verify            # sobe Postgres via Testcontainers automaticamente
 ```
 
 Swagger UI: http://localhost:8088/q/swagger-ui.
 
 ## Testes
 
-- `BillingSchemaBootstrapTest` — prova que as migrations de security + billing (V500/V501) + app
-  (plans/subscriptions, V1000) rodam no mesmo banco, incluindo a semente de permissions do billing
-  vinculadas a `ADMIN` e dos planos `BASIC`/`PRO`.
-- `BillingCheckoutWebhookFlowTest` — fluxo completo: login admin → checkout → webhook
-  `CHECKOUT_COMPLETED` assinado → `GET /api/subscriptions/me` mostra `PRO`/`ACTIVE` → webhook
-  `SUBSCRIPTION_CANCELED` → `GET /api/subscriptions/me` mostra `CANCELED`; mais um teste de
-  assinatura HMAC inválida → `400`.
+- `BillingSchemaBootstrapTest`: as migrations de security, audit, billing e app rodam no mesmo banco; a
+  permissão do produto e a cota do trial (contador `reports`) estão lá.
+- `BillingCheckoutWebhookFlowTest`: o fluxo acima, mais um term com contador não declarado (400) e um
+  webhook com assinatura inválida (400).
 
-## Pegadinhas encontradas montando este exemplo
+## Pegadinhas
 
-- **BUG na extension (#14, CORRIGIDO no `seedgrid-billing-core:2026.07.08`)**: até a versão
-  `2026.07.02`, o arquivo empacotado `db/migration/billing/V501_add_permissions.sql` usava
-  **underscore simples** entre a versão e a descrição, e o Flyway o **ignorava silenciosamente**
-  (só um `WARN` — `validateMigrationNaming` é `false` por padrão), então as permissions
-  `BILLING_CHECKOUT_CREATE`/`BILLING_PORTAL_CREATE` nunca eram semeadas e o admin recebia `403`
-  em `POST /billing/checkout` e `/billing/portal`. A partir de `2026.07.08` o arquivo foi
-  renomeado para `V501__add_permissions.sql` (underscore duplo), roda de verdade e é defensivo
-  (bloco `DO $$`: só semeia se a tabela `permissions` existir — em hosts com `seedgrid-security`,
-  como este, semeia normalmente). Nota histórica: este exemplo contornava o bug com uma migration
-  própria `V1001__workaround_billing_permissions_naming_bug.sql` (mesmo SQL do V501, idempotente),
-  removida após o fix — agora as permissions vêm do V501 oficial da extension.
-- `seedgrid-billing-core` empacota seu **próprio** `META-INF/microprofile-config.properties` com
-  `quarkus.flyway.locations=db/migration/billing` e
-  `quarkus.flyway.table=flyway_schema_history_billing` como *defaults* — diferente de
-  security/apikeys, que não setam essas properties. Se você não sobrescrever
-  `quarkus.flyway.locations` incluindo `classpath:db/migration/billing` (junto com `security` e
-  `app`) e uma `quarkus.flyway.table` única, a tabela `billing_events` nunca é criada e o app só
-  quebra em runtime na primeira chamada de checkout/webhook — não no boot.
-- Migrations da app host (`db/migration/app`) sempre `V1000+`: o Flyway aplica tudo em ordem de
-  versão **global**, não por pasta. Convenção do ecossistema: `subdomain-tenancy`=V100s,
-  `security`=V200s, `audit`=V300s, `backup`=V400s, `billing`=V500-501, `apikeys`=V600s,
-  `login-tenancy`=V700s.
-- `BillingProvider` é uma SPI **completa** (15 métodos) — mesmo implementando só o fluxo de
-  checkout/webhook/cancelamento neste exemplo, os demais métodos (troca de plano, portal,
-  invoices, proration...) precisam de um corpo (ainda que no-op) para compilar.
-- Headers HTTP no `RawWebhookRequest.headers()` chegam com o *case* original do cliente (o
-  `BillingWebhookController` monta o `Map<String, List<String>>` direto de
-  `HttpHeaders.getRequestHeaders()`, sem normalizar) — comparar o nome do header
-  (`x-fake-signature`) com `equalsIgnoreCase`, não com `.get(chave-exata)`.
-- Para resolver a *company* do usuário logado num endpoint próprio (`GET /api/subscriptions/me`),
-  basta injetar `br.com.seedgrid.security.services.CompanyRequestContext` e ler
-  `getCurrentCompanyId()` — já vem populado pelo `CompanyContextFilter` do `seedgrid-security` a
-  partir da claim `companyId` do JWT (não precisa resolver `User` → `Company` manualmente).
-- `seedgrid-billing-core` traz `seedgrid-resilience-core` como dependência transitiva (usa
-  `@SeedGridRateLimit` nos próprios endpoints de checkout/portal/webhook) — não precisou adicionar
-  nada no `pom.xml` deste exemplo além do `seedgrid-billing-core`, o Maven resolveu offline.
-- O admin criado pelo bootstrap (`FirstAdminBootstrapService`) nasce com e-mail **não confirmado**
-  e `changePasswordRequired=true` — os testes precisam confirmar o e-mail e limpar essa flag direto
-  no banco antes de logar.
+- **Versão do `seedgrid-commons`:** o `pom.xml` fixa o commons que a billing exige. Sem isso, o Maven
+  escolhe a versão mais antiga, que chega pela security, e a billing quebra em runtime
+  (`NoClassDefFoundError`) ao gravar um term.
+- `seedgrid-billing-core` empacota o próprio `META-INF/microprofile-config.properties` com
+  `quarkus.flyway.locations=db/migration/billing`. Ao sobrescrever `quarkus.flyway.locations`, inclua
+  `classpath:db/migration/billing` (junto com `security`, `audit` e `app`). Sem isso, o app sobe e só quebra
+  na primeira chamada de billing.
+- As migrations da app são sempre `V1000+`: o Flyway ordena por versão **global**, não por pasta
+  (`security`=2xx, `audit`=3xx, `billing`=5xx).
+- Ao trocar migrations de lugar ou de nome, rode `mvn clean`: um arquivo antigo em `target/classes` gera
+  "Found more than one migration with version ...".
+- O admin criado pelo bootstrap (`FirstAdminBootstrapService`) nasce com e-mail **não confirmado** e
+  `changePasswordRequired=true`. Os testes confirmam o e-mail e limpam essa flag direto no banco antes de
+  logar.

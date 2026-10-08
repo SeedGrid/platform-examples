@@ -71,20 +71,28 @@
         <dependency>
             <groupId>br.com.seedgrid</groupId>
             <artifactId>seedgrid-security</artifactId>
-            <version>2026.09.25</version>
+            <version>2026.09.25-2</version>
         </dependency>
         <!-- Provider de auditoria (backend JPA). O host final escolhe o provider;
              as libs (security/tenancy/backup) trazem apenas o audit-core. -->
         <dependency>
             <groupId>br.com.seedgrid</groupId>
             <artifactId>seedgrid-audit-postgresql</artifactId>
-            <version>2026.07.08</version>
+            <version>2026.09.25</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>br.com.seedgrid</groupId>
             <artifactId>seedgrid-billing-core</artifactId>
-            <version>2026.09.10</version>
+            <version>2026.09.25</version>
+        </dependency>
+        <!-- Fixa o commons que a billing exige (JsonAttributeMerger etc.). Sem isto o Maven escolhe o
+             2026.08.16 que chega pela security (o mais proximo na arvore) e a billing quebra em runtime
+             com NoClassDefFoundError ao gravar um term. -->
+        <dependency>
+            <groupId>br.com.seedgrid</groupId>
+            <artifactId>seedgrid-commons</artifactId>
+            <version>2026.09.25</version>
         </dependency>
 
         <dependency>
@@ -95,6 +103,12 @@
         <dependency>
             <groupId>io.rest-assured</groupId>
             <artifactId>rest-assured</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>3.24.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>

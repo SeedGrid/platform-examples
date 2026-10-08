@@ -1,58 +1,41 @@
 package br.com.seedgrid.billingexample;
 
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
-import java.nio.charset.StandardCharsets;
-import java.security.NoSuchAlgorithmException;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.util.HexFormat;
-import java.util.LinkedHashMap;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
 import javax.sql.DataSource;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import br.com.seedgrid.billingexample.billing.FakeBillingProvider;
+import br.com.seedgrid.billingexample.gateway.FakeGatewayResource;
 import br.com.seedgrid.security.entities.User;
 import br.com.seedgrid.security.repositories.UserRepository;
 import io.quarkus.narayana.jta.QuarkusTransaction;
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
+import io.restassured.path.json.JsonPath;
+import io.restassured.specification.RequestSpecification;
 import jakarta.inject.Inject;
 
 /**
- * Demonstra o fluxo didatico central do exemplo: checkout -> webhook fake (assinado por HMAC) ->
- * assinatura ativa por company -> webhook de cancelamento -> assinatura inativa.
- *
- * <p>O {@link br.com.seedgrid.billingexample.billing.FakeBillingProvider} nao fala com nenhum
- * gateway real: o "pagamento confirmado" e simulado chamando o proprio endpoint publico de
- * webhook com um payload JSON sintetico (formato definido por este exemplo, ver
- * {@link br.com.seedgrid.billingexample.billing.FakeWebhookPayload}), assinado com HMAC-SHA256
- * (header {@value FakeBillingProvider#SIGNATURE_HEADER}) usando o segredo configurado em
- * {@code seedgrid.billing.fake.webhook-secret} (test: "test-fake-webhook-secret").</p>
+ * A jornada inteira de um produto que so' configura o billing: trial com a cota do produto, bloqueio por
+ * franquia e por funcionalidade, plano pago criado pelo admin, checkout, pagamento no gateway fake e acesso
+ * liberado. Nenhuma linha de billing no produto alem do validador e das anotacoes.
  */
 @QuarkusTest
 @QuarkusTestResource(PostgresTestResource.class)
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class BillingCheckoutWebhookFlowTest {
 
     private static final String ADMIN_EMAIL = "admin@test.com";
     private static final String ADMIN_PASSWORD = "Admin@12345";
-    private static final String WEBHOOK_SECRET = "test-fake-webhook-secret";
 
     @Inject
     UserRepository userRepository;
@@ -60,12 +43,9 @@ class BillingCheckoutWebhookFlowTest {
     @Inject
     DataSource dataSource;
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
-
     @BeforeEach
-    void confirmBootstrapAdminEmail() {
-        // O FirstAdminBootstrapService (seedgrid-security) cria o primeiro admin com o e-mail NAO
-        // confirmado; confirmamos direto no banco pra poder logar no teste (ver pegadinha #9).
+    void confirmBootstrapAdmin() {
+        // O primeiro admin nasce com e-mail nao confirmado e troca de senha obrigatoria.
         QuarkusTransaction.requiringNew().run(() -> {
             User admin = userRepository.findByEmail(ADMIN_EMAIL).orElseThrow();
             admin.confirmEmail();
@@ -74,161 +54,101 @@ class BillingCheckoutWebhookFlowTest {
     }
 
     @Test
-    @Order(1)
-    void checkoutThenWebhookActivatesSubscriptionForCompany() throws Exception {
-        String adminToken = loginAdmin();
-        long companyId = findDefaultCompanyId();
+    void trialFranquiaPlanoPagoCheckoutEAcessoLiberado() throws Exception {
+        String token = login();
 
-        // 1. Admin (JWT) inicia um checkout para o plano PRO.
-        String checkoutSessionId = given()
-                .header("Authorization", "Bearer " + adminToken)
-                .contentType(ContentType.JSON)
-                .body(Map.of(
-                        "planCode", "PRO",
-                        "customerEmail", ADMIN_EMAIL,
-                        "successUrl", "http://localhost/success",
-                        "cancelUrl", "http://localhost/cancel"))
-                .when()
-                .post("/billing/checkout")
-                .then()
-                .statusCode(200)
-                .body("provider", equalTo("fake"))
-                .extract().jsonPath().getString("checkoutSessionId");
-        assertNotNull(checkoutSessionId);
+        // 1. A conta nasce no trial, com a cota que ESTE produto definiu (V1000: 3 relatorios).
+        JsonPath trial = as(token).when().get("/me/subscription").then().statusCode(200).extract().jsonPath();
+        assertAll(
+                () -> assertThat(trial.getBoolean("plan.isTrial")).isTrue(),
+                () -> assertThat(trial.getString("planTerm.meters[0].meter")).isEqualTo("reports"),
+                () -> assertThat(trial.getInt("planTerm.meters[0].includedUnits")).isEqualTo(3),
+                () -> assertThat(trial.getInt("billingCycle.meters[0].includedUnits")).isEqualTo(3));
 
-        // 2. Simula o "pagamento confirmado": chama o proprio endpoint publico de webhook com um
-        // payload sintetico CHECKOUT_COMPLETED, assinado por HMAC (sem JWT nenhum - o provider
-        // valida a assinatura, nao o token).
-        String providerSubscriptionId = "sub_fake_" + UUID.randomUUID();
-        Map<String, Object> payload = new LinkedHashMap<>();
-        payload.put("eventId", "evt_" + UUID.randomUUID());
-        payload.put("type", "CHECKOUT_COMPLETED");
-        payload.put("companyId", companyId);
-        payload.put("planCode", "PRO");
-        payload.put("subscriptionId", providerSubscriptionId);
-        payload.put("customerId", "cus_fake_" + UUID.randomUUID());
-        payload.put("checkoutSessionId", checkoutSessionId);
+        // 2. Cada relatorio gasta uma unidade; acabou a franquia, 402 com o motivo.
+        for (int i = 0; i < 3; i++) {
+            as(token).when().post("/api/reports").then().statusCode(200);
+        }
+        String quotaCode = as(token).when().post("/api/reports").then().statusCode(402).extract().path("code");
+        // 3. Funcionalidade que o trial nao libera.
+        String featureCode = as(token).when().get("/api/reports/export").then().statusCode(402).extract().path("code");
+        assertAll(
+                () -> assertThat(quotaCode).isEqualTo("TRIAL_QUOTA_EXCEEDED"),
+                () -> assertThat(featureCode).isEqualTo("FEATURE_NOT_IN_PLAN"));
 
-        postSignedWebhook(payload);
+        // 4. O admin (empresa da plataforma) cria o plano Pro pelos endpoints do billing: franquia e
+        //    excedente do contador `reports` vao em `meters`, e o term libera a exportacao.
+        String planId = as(token).body(Map.of("name", "Pro")).when().post("/admin/plans")
+                .then().statusCode(201).extract().path("publicId");
+        as(token).body(Map.of(
+                        "monthlyPrice", 99.90,
+                        "meters", List.of(Map.of("meter", "reports", "includedUnits", 100, "overagePrice", 0.50)),
+                        "effectiveFrom", OffsetDateTime.now(ZoneOffset.UTC).minusDays(1).toString(),
+                        "permissionPublicIds", List.of(permissionPublicId("REPORT_EXPORT"))))
+                .when().post("/admin/plans/" + planId + "/terms")
+                .then().statusCode(201);
 
-        // 3. GET /api/subscriptions/me (qualquer usuario autenticado da company) mostra o plano PRO
-        // ativo.
-        given()
-                .header("Authorization", "Bearer " + adminToken)
-                .when()
-                .get("/api/subscriptions/me")
-                .then()
-                .statusCode(200)
-                .body("planCode", equalTo("PRO"))
-                .body("status", equalTo("ACTIVE"))
-                .body("providerSubscriptionId", equalTo(providerSubscriptionId));
+        // 5. Checkout: o client manda so' o plano; a extension monta o resto.
+        String checkoutUrl = as(token).body(Map.of("planId", planId)).when().post("/me/billing/checkout")
+                .then().statusCode(200).extract().path("checkoutUrl");
+        assertThat(checkoutUrl).contains(FakeGatewayResource.PATH + "/checkout/");
 
-        // Guarda para o proximo teste (cancelamento) via banco: nao ha estado entre testes JUnit
-        // isolado por instancia, entao persistimos o id no proprio banco e recuperamos por SQL.
+        // 6. "Pagar": abrir a URL do checkout no gateway fake, que entrega o webhook assinado.
+        given().when().get(checkoutUrl.substring(checkoutUrl.indexOf(FakeGatewayResource.PATH)))
+                .then().statusCode(200);
+
+        // 7. Plano pago ativo, franquia nova, exportacao liberada.
+        JsonPath paid = as(token).when().get("/me/subscription").then().statusCode(200).extract().jsonPath();
+        assertAll(
+                () -> assertThat(paid.getBoolean("plan.isTrial")).isFalse(),
+                () -> assertThat(paid.getString("plan.id")).isEqualTo(planId),
+                () -> assertThat(paid.getInt("billingCycle.meters[0].includedUnits")).isEqualTo(100),
+                () -> as(token).when().post("/api/reports").then().statusCode(200),
+                () -> as(token).when().get("/api/reports/export").then().statusCode(200));
     }
 
     @Test
-    @Order(2)
-    void secondWebhookCancelsSubscription() throws Exception {
-        String adminToken = loginAdmin();
-        long companyId = findDefaultCompanyId();
-        String providerSubscriptionId = findActiveSubscriptionProviderId(companyId);
-        assertNotNull(providerSubscriptionId, "teste anterior deveria ter ativado uma subscription");
+    void termComContadorQueOProdutoNaoDeclaraERecusado() {
+        String token = login();
+        String planId = as(token).body(Map.of("name", "Contador errado")).when().post("/admin/plans")
+                .then().statusCode(201).extract().path("publicId");
 
-        // 4. Simula o cancelamento: webhook SUBSCRIPTION_CANCELED referenciando a MESMA
-        // providerSubscriptionId.
-        Map<String, Object> payload = new LinkedHashMap<>();
-        payload.put("eventId", "evt_" + UUID.randomUUID());
-        payload.put("type", "SUBSCRIPTION_CANCELED");
-        payload.put("companyId", companyId);
-        payload.put("planCode", "PRO");
-        payload.put("subscriptionId", providerSubscriptionId);
-        payload.put("customerId", "cus_fake_cancel");
+        String code = as(token).body(Map.of("monthlyPrice", 10,
+                        "meters", List.of(Map.of("meter", "relatorios", "includedUnits", 10, "overagePrice", 0))))
+                .when().post("/admin/plans/" + planId + "/terms")
+                .then().statusCode(400).extract().path("code");
 
-        postSignedWebhook(payload);
-
-        // 5. GET /api/subscriptions/me agora mostra status CANCELED.
-        given()
-                .header("Authorization", "Bearer " + adminToken)
-                .when()
-                .get("/api/subscriptions/me")
-                .then()
-                .statusCode(200)
-                .body("status", equalTo("CANCELED"));
+        assertThat(code).isEqualTo("INVALID_PLAN_TERM_METER");
     }
 
     @Test
-    void webhookWithInvalidSignatureIsRejected() throws Exception {
-        Map<String, Object> payload = new LinkedHashMap<>();
-        payload.put("eventId", "evt_invalid_sig");
-        payload.put("type", "CHECKOUT_COMPLETED");
-        payload.put("companyId", 1);
-        payload.put("planCode", "PRO");
-        payload.put("subscriptionId", "sub_x");
-        payload.put("customerId", "cus_x");
-
-        String body = objectMapper.writeValueAsString(payload);
-
-        given()
-                .contentType(ContentType.JSON)
-                .header(FakeBillingProvider.SIGNATURE_HEADER, "assinatura-invalida")
-                .body(body)
-                .when()
-                .post("/public/billing/webhook")
-                .then()
-                .statusCode(400);
+    void webhookComAssinaturaInvalidaERecusado() {
+        given().contentType(ContentType.JSON)
+                .header("x-fake-signature", "assinatura-errada")
+                .body("{\"eventId\":\"evt_x\",\"type\":\"CHECKOUT_COMPLETED\"}")
+                .when().post("/public/billing/webhook")
+                .then().statusCode(400);
     }
 
-    private String loginAdmin() {
-        return given()
-                .contentType(ContentType.JSON)
-                .body("{\"login\":\"" + ADMIN_EMAIL + "\",\"password\":\"" + ADMIN_PASSWORD + "\"}")
-                .when()
-                .post("/public/auth/login")
-                .then()
-                .statusCode(200)
-                .body("status", equalTo("OK"))
+    private String login() {
+        return given().contentType(ContentType.JSON)
+                .body(Map.of("login", ADMIN_EMAIL, "password", ADMIN_PASSWORD))
+                .when().post("/public/auth/login")
+                .then().statusCode(200)
                 .extract().path("token");
     }
 
-    private void postSignedWebhook(Map<String, Object> payload) throws Exception {
-        String body = objectMapper.writeValueAsString(payload);
-        String signature = hmacHex(body);
-
-        given()
-                .contentType(ContentType.JSON)
-                .header(FakeBillingProvider.SIGNATURE_HEADER, signature)
-                .body(body)
-                .when()
-                .post("/public/billing/webhook")
-                .then()
-                .statusCode(200);
+    private static RequestSpecification as(String token) {
+        return given().header("Authorization", "Bearer " + token).contentType(ContentType.JSON);
     }
 
-    private String hmacHex(String body) throws NoSuchAlgorithmException, java.security.InvalidKeyException {
-        Mac mac = Mac.getInstance("HmacSHA256");
-        mac.init(new SecretKeySpec(WEBHOOK_SECRET.getBytes(StandardCharsets.UTF_8), "HmacSHA256"));
-        return HexFormat.of().formatHex(mac.doFinal(body.getBytes(StandardCharsets.UTF_8)));
-    }
-
-    private long findDefaultCompanyId() throws Exception {
-        try (Connection conn = dataSource.getConnection();
-                var stmt = conn.createStatement();
-                ResultSet rs = stmt.executeQuery("SELECT id FROM companies ORDER BY id LIMIT 1")) {
-            if (!rs.next()) {
-                throw new IllegalStateException("Nenhuma company encontrada (bootstrap nao rodou?)");
-            }
-            return rs.getLong(1);
-        }
-    }
-
-    private String findActiveSubscriptionProviderId(long companyId) throws Exception {
-        try (Connection conn = dataSource.getConnection();
-                var ps = conn.prepareStatement(
-                        "SELECT provider_subscription_id FROM subscriptions WHERE company_id = ?")) {
-            ps.setLong(1, companyId);
-            try (ResultSet rs = ps.executeQuery()) {
-                return rs.next() ? rs.getString(1) : null;
+    private String permissionPublicId(String name) throws Exception {
+        try (var conn = dataSource.getConnection();
+                var ps = conn.prepareStatement("select public_id from permissions where name = ?")) {
+            ps.setString(1, name);
+            try (var rs = ps.executeQuery()) {
+                rs.next();
+                return rs.getString(1);
             }
         }
     }

@@ -1,5 +1,7 @@
 package br.com.seedgrid.billingexample;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.sql.Connection;
@@ -14,9 +16,9 @@ import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 
 /**
- * Prova que as migrations reais de security + billing (seedgrid-billing-core, V500/V501) + app
- * (plans/subscriptions, V1000) rodam TODAS no mesmo banco/tabela de historico do Flyway, incluindo
- * a semente de permissions do billing (vinculadas a ADMIN) e dos planos de exemplo.
+ * As migrations de security + auditoria + billing + app rodam no mesmo banco: as tabelas de plano,
+ * assinatura e ciclo sao do billing (o produto nao cria nenhuma) e o produto so' acrescenta a sua
+ * permissao e a cota do trial.
  */
 @QuarkusTest
 @QuarkusTestResource(PostgresTestResource.class)
@@ -26,60 +28,39 @@ class BillingSchemaBootstrapTest {
     DataSource dataSource;
 
     @Test
-    void migrationsCreateSchemaAndSeedPlansAndPermissions() throws Exception {
+    void billingCriaAsTabelasEOProdutoSoAcrescentaOCampoDele() throws Exception {
         try (Connection conn = dataSource.getConnection()) {
-            assertTrue(tableExists(conn, "users"), "tabela users (security)");
-            assertTrue(tableExists(conn, "companies"), "tabela companies (security)");
-            assertTrue(tableExists(conn, "billing_events"), "tabela billing_events (billing-core)");
-            assertTrue(tableExists(conn, "plans"), "tabela plans (app host)");
-            assertTrue(tableExists(conn, "subscriptions"), "tabela subscriptions (app host)");
-
-            assertTrue(permissionExists(conn, "BILLING_CHECKOUT_CREATE"), "permission BILLING_CHECKOUT_CREATE semeada");
-            assertTrue(permissionExists(conn, "BILLING_PORTAL_CREATE"), "permission BILLING_PORTAL_CREATE semeada");
-            assertTrue(adminHasPermission(conn, "BILLING_CHECKOUT_CREATE"),
-                    "ADMIN deve ter BILLING_CHECKOUT_CREATE (V501 do billing-core)");
-
-            assertTrue(planExists(conn, "BASIC"), "plano BASIC semeado (app host)");
-            assertTrue(planExists(conn, "PRO"), "plano PRO semeado (app host)");
+            assertAll(
+                    () -> assertTrue(tableExists(conn, "users"), "users (security)"),
+                    () -> assertTrue(tableExists(conn, "plans"), "plans (billing)"),
+                    () -> assertTrue(tableExists(conn, "plan_terms"), "plan_terms (billing)"),
+                    () -> assertTrue(tableExists(conn, "tenant_subscriptions"), "assinaturas (billing)"),
+                    () -> assertTrue(tableExists(conn, "subscription_billing_cycles"), "ciclos (billing)"),
+                    () -> assertTrue(tableExists(conn, "billing_account_history"), "historico (billing)"),
+                    () -> assertTrue(adminHas(conn, "PLAN_CREATE"), "ADMIN com PLAN_CREATE (billing/V510)"),
+                    () -> assertTrue(adminHas(conn, "REPORT_EXPORT"), "ADMIN com REPORT_EXPORT (app/V1000)"),
+                    () -> assertEquals("3", value(conn, "select m.included_units::text from plan_term_meters m "
+                            + "join plan_terms t on t.id = m.plan_term_id "
+                            + "where t.public_id = '00000000-0000-0000-0000-0000000000a2' and m.meter = 'reports'"),
+                            "cota do trial no contador reports (app/V1000)"));
         }
     }
 
-    private boolean tableExists(Connection conn, String table) throws Exception {
+    private static boolean tableExists(Connection conn, String table) throws Exception {
         try (ResultSet rs = conn.getMetaData().getTables(null, null, table, new String[] { "TABLE" })) {
             return rs.next();
         }
     }
 
-    private boolean permissionExists(Connection conn, String name) throws Exception {
-        try (var ps = conn.prepareStatement("SELECT 1 FROM permissions WHERE name = ?")) {
-            ps.setString(1, name);
-            try (ResultSet rs = ps.executeQuery()) {
-                return rs.next();
-            }
-        }
+    private static boolean adminHas(Connection conn, String permission) throws Exception {
+        return value(conn, "select p.name from roles r join role_permissions rp on rp.role_id = r.id "
+                + "join permissions p on p.id = rp.permission_id where r.name = 'ADMIN' and p.name = '"
+                + permission + "'") != null;
     }
 
-    private boolean planExists(Connection conn, String code) throws Exception {
-        try (var ps = conn.prepareStatement("SELECT 1 FROM plans WHERE code = ?")) {
-            ps.setString(1, code);
-            try (ResultSet rs = ps.executeQuery()) {
-                return rs.next();
-            }
-        }
-    }
-
-    private boolean adminHasPermission(Connection conn, String permissionName) throws Exception {
-        String sql = """
-                SELECT 1 FROM roles r
-                JOIN role_permissions rp ON rp.role_id = r.id
-                JOIN permissions p ON p.id = rp.permission_id
-                WHERE r.name = 'ADMIN' AND p.name = ?
-                """;
-        try (var ps = conn.prepareStatement(sql)) {
-            ps.setString(1, permissionName);
-            try (ResultSet rs = ps.executeQuery()) {
-                return rs.next();
-            }
+    private static String value(Connection conn, String sql) throws Exception {
+        try (var ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+            return rs.next() ? rs.getString(1) : null;
         }
     }
 }
