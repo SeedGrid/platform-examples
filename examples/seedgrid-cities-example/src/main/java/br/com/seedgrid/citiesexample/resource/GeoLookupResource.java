@@ -4,7 +4,7 @@ import java.util.List;
 
 import br.com.seedgrid.cities.dtos.CitiesDTOs.CityDto;
 import br.com.seedgrid.cities.services.BrazilGeo;
-import jakarta.annotation.security.RolesAllowed;
+import io.quarkus.security.PermissionsAllowed;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.Path;
@@ -16,7 +16,7 @@ import jakarta.ws.rs.core.MediaType;
 /** Uso da fachada {@link BrazilGeo} pelo codigo do host (alem da REST pronta da extension). */
 @Path("/api/geo")
 @Produces(MediaType.APPLICATION_JSON)
-@RolesAllowed("reader")
+@PermissionsAllowed("CITY_READ")
 public class GeoLookupResource {
 
     private final BrazilGeo geo;
