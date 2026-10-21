@@ -61,25 +61,21 @@ public class StubWhatsAppApi implements WhatsAppApi {
     @Override
     public WhatsAppSendMessageResultDTO sendMediaFile(String channelId, WhatsAppMediaMessageFileDTO msg) {
         throw new UnsupportedOperationException("not used in this example");
-        return WhatsAppSendMessageResultDTO.empty();
     }
 
     @Override
     public WhatsAppSendMessageResultDTO sendMediaUrl(String channelId, WhatsAppMediaMessageURLDTO msg) {
         throw new UnsupportedOperationException("not used in this example");
-        return WhatsAppSendMessageResultDTO.empty();
     }
 
     @Override
     public WhatsAppSendMessageResultDTO sendAudioFile(String channelId, WhatsAppAudioMessageFileDTO msg) {
         throw new UnsupportedOperationException("not used in this example");
-        return WhatsAppSendMessageResultDTO.empty();
     }
 
     @Override
     public WhatsAppSendMessageResultDTO sendAudioUrl(String channelId, WhatsAppAudioMessageURLDTO msg) {
         throw new UnsupportedOperationException("not used in this example");
-        return WhatsAppSendMessageResultDTO.empty();
     }
 
     @Override
