@@ -87,7 +87,7 @@ class ProductCompanyIsolationTest {
         signup.name = companyName;
         signup.corporateName = companyName + " LTDA";
         signup.tradeName = companyName;
-        signup.cnpj = cnpj;
+        signup.cpfCnpj = cnpj;
         signup.verificationToken = token;
         signup.passwordHash = secretEncryptionService.encrypt(RAW_PASSWORD);
         signup.legalRepresentative = Contact.builder()
