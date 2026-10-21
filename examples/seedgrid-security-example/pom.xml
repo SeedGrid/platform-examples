@@ -60,15 +60,42 @@
         <dependency>
             <groupId>br.com.seedgrid</groupId>
             <artifactId>seedgrid-security</artifactId>
-            <version>2026.09.25</version>
+            <version>2026.10.14</version>
         </dependency>
         <!-- Provider de auditoria (backend JPA). O host final escolhe o provider;
              as libs (security/tenancy/backup) trazem apenas o audit-core. -->
         <dependency>
             <groupId>br.com.seedgrid</groupId>
             <artifactId>seedgrid-audit-postgresql</artifactId>
-            <version>2026.07.08</version>
+            <version>2026.09.25</version>
             <scope>runtime</scope>
+        </dependency>
+
+        <!-- Redis REAL nos testes (TC2.0, guardiao da revogacao de sessao com o cache fora do ar): provider
+             distribuido + testkit do lib-cache (CacheContainer com porta fixa, stop/start). So' no classpath de
+             teste: o runtime do exemplo continua sem provider distribuido. -->
+        <dependency>
+            <groupId>br.com.seedgrid</groupId>
+            <artifactId>seedgrid-cache-redis</artifactId>
+            <version>2026.10.13</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>br.com.seedgrid</groupId>
+            <artifactId>seedgrid-cache-testkit</artifactId>
+            <version>2026.10.13</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers</artifactId>
+            <version>1.21.3</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.awaitility</groupId>
+            <artifactId>awaitility</artifactId>
+            <scope>test</scope>
         </dependency>
 
         <!-- IT do fluxo HTTP (login + select-company) do modelo T1. -->

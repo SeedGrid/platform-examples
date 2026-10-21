@@ -3001,7 +3001,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import br.com.seedgrid.security.entities.User;
 import br.com.seedgrid.security.exceptions.InvalidUserAdditionalAttributesException;
-import br.com.seedgrid.security.spi.UserAdditionalFieldsValidator;
+import br.com.seedgrid.security.spis.UserAdditionalFieldsValidator;
 import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
