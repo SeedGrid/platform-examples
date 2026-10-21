@@ -8,7 +8,7 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 import io.quarkus.security.PermissionsAllowed;
 import io.smallrye.common.annotation.Blocking;
-import br.com.seedgrid.subdomaintenancy.annotations.MasterOnly;
+import br.com.seedgrid.subdomaintenancy.annotations.SgMasterOnly;
 import br.com.seedgrid.subdomaintenancyexample.dto.PaymentPlanDTO;
 import br.com.seedgrid.subdomaintenancyexample.service.PaymentPlanService;
 import jakarta.inject.Inject;
@@ -29,14 +29,14 @@ import jakarta.ws.rs.core.Response;
  * REST Resource for PaymentPlan (MASTER database)
  * Accessible from seedgrid.com.br domain
  *
- * This resource is marked with @MasterOnly, so it will only appear
+ * This resource is marked with @SgMasterOnly, so it will only appear
  * in the Swagger UI when accessed from the master domain.
  */
 @Path("/api/payment-plans")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @Tag(name = "Payment Plans", description = "Payment plan management (MASTER)")
-@MasterOnly
+@SgMasterOnly
 @Blocking
 public class PaymentPlanResource {
 

@@ -6,7 +6,7 @@ import java.util.Map;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
-import br.com.seedgrid.resilience.core.runtime.ratelimiter.annotations.SeedGridRateLimit;
+import br.com.seedgrid.resilience.core.runtime.ratelimiter.annotations.SgRateLimit;
 import br.com.seedgrid.resilience.core.runtime.ratelimiter.enums.RateLimitAlgorithm;
 import br.com.seedgrid.resilienceexample.service.CatalogService;
 import jakarta.inject.Inject;
@@ -33,7 +33,7 @@ public class ExampleResource {
     @GET
     @Path("/greeting")
     @Operation(summary = "Janela fixa: 3 chamadas / 10s por IP - a 4a recebe 429")
-    @SeedGridRateLimit(
+    @SgRateLimit(
             configKey = "greeting",
             permits = 3,
             window = 10,
@@ -46,7 +46,7 @@ public class ExampleResource {
     @GET
     @Path("/checkout")
     @Operation(summary = "Token bucket: 2 permits/min com rajada de ate 5 - permite bursts curtos")
-    @SeedGridRateLimit(
+    @SgRateLimit(
             configKey = "checkout",
             permits = 2,
             window = 1,

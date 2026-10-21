@@ -10,7 +10,7 @@ import org.eclipse.microprofile.openapi.annotations.info.Info;
         version = "1.0.0",
         description = """
             API de exemplo para o seedgrid-resilience-core: rate limiting e circuit breaker
-            declarativos via @SeedGridRateLimit / @SeedGridCircuitBreaker, sem depender de
+            declarativos via @SgRateLimit / @SgCircuitBreaker, sem depender de
             nenhuma outra extensao SeedGrid.
 
             Fluxo:
@@ -19,7 +19,7 @@ import org.eclipse.microprofile.openapi.annotations.info.Info;
             2. GET /api/checkout - rate limit por token bucket (2 permits/min, burst de 5) -
                permite rajadas curtas mantendo uma taxa media sustentavel.
             3. GET /api/catalog/{id} - chama um "servico instavel" simulado (CatalogService),
-               protegido por @SeedGridCircuitBreaker com fallbackMethod. Use
+               protegido por @SgCircuitBreaker com fallbackMethod. Use
                POST /api/catalog/chaos/{enabled} pra ligar/desligar falhas simuladas e
                GET /api/catalog/_stats pra provar que, com o circuito aberto, as chamadas
                reais param de acontecer (o fallback responde sem tocar o servico real).

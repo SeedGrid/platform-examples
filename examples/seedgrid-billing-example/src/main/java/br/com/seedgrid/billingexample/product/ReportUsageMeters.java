@@ -12,7 +12,7 @@ import jakarta.enterprise.context.ApplicationScoped;
  * cobranca sozinho.
  *
  * <p>Outro contador (ex.: MB armazenados) e' so' mais uma linha aqui, contada com
- * {@code @ConsumesUsage(meter = "...")} ou com {@code UsageService.consume(...)}. A demonstracao com dois
+ * {@code @SgConsumesUsage(meter = "...")} ou com {@code UsageService.consume(...)}. A demonstracao com dois
  * contadores esta nos boilerplates.</p>
  */
 @ApplicationScoped

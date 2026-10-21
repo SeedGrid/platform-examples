@@ -49,7 +49,7 @@ public class CustomerResource {
 
     @GET
     @Path("/{id}/masked")
-    @Operation(summary = "Busca por id — devolve a PII MASCARADA (@PersonalData) para log/auditoria")
+    @Operation(summary = "Busca por id — devolve a PII MASCARADA (@SgPersonalData) para log/auditoria")
     public Response findByIdMasked(@PathParam("id") Long id) {
         return service.findById(id)
                 .map(c -> Response.ok(service.mask(CustomerResponse.from(c))).build())

@@ -98,7 +98,7 @@ Esta documentação descreve todas as bibliotecas SeedGrid utilizadas no projeto
 - Suporte a MongoDB ou JPA como storage
 - Captura de dados antes/depois da operação
 - Integração com contexto de tenant e usuário
-- Anotação `@Audit` para marcar métodos auditáveis
+- Anotação `@SgAudit` para marcar métodos auditáveis
 
 **Dependência Maven**:
 ```xml
@@ -1412,16 +1412,16 @@ public class CustomBackupTemplateProvider implements TemplateBackupProvider {
 
 ### seedgrid-subdomain-tenancy
 
-#### @MasterOnly
+#### @SgMasterOnly
 
-**Localização**: `br.com.seedgrid.subdomaintenancy.annotations.MasterOnly`
+**Localização**: `br.com.seedgrid.subdomaintenancy.annotations.SgMasterOnly`
 
 **Propósito**: Marcar endpoints que devem aparecer apenas no OpenAPI/Swagger do domínio master.
 
 **Uso**:
 ```java
 @Path("/api/tenants")
-@MasterOnly
+@SgMasterOnly
 public class TenantResource {
 
     @GET
@@ -1440,7 +1440,7 @@ public class UserResource {
 
     @GET
     @Path("/admin/stats")
-    @MasterOnly
+    @SgMasterOnly
     public UserStats getAdminStats() {
         // Só aparece no master
         return statsService.getGlobalStats();
@@ -1456,16 +1456,16 @@ public class UserResource {
 
 ---
 
-#### @TenantOnly
+#### @SgTenantOnly
 
-**Localização**: `br.com.seedgrid.subdomaintenancy.annotations.TenantOnly`
+**Localização**: `br.com.seedgrid.subdomaintenancy.annotations.SgTenantOnly`
 
 **Propósito**: Marcar endpoints que devem aparecer apenas no OpenAPI/Swagger de tenants.
 
 **Uso**:
 ```java
 @Path("/api/invoices")
-@TenantOnly
+@SgTenantOnly
 public class InvoiceResource {
 
     @GET
@@ -1477,14 +1477,14 @@ public class InvoiceResource {
 }
 ```
 
-**Combinando com @MasterOnly**:
+**Combinando com @SgMasterOnly**:
 ```java
 @Path("/api/reports")
 public class ReportResource {
 
     @GET
     @Path("/tenant-sales")
-    @TenantOnly
+    @SgTenantOnly
     public SalesReport getTenantSales() {
         // Só no tenant
         return reportService.getTenantSales();
@@ -1492,7 +1492,7 @@ public class ReportResource {
 
     @GET
     @Path("/global-sales")
-    @MasterOnly
+    @SgMasterOnly
     public SalesReport getGlobalSales() {
         // Só no master
         return reportService.getGlobalSales();
@@ -1511,9 +1511,9 @@ public class ReportResource {
 
 ### seedgrid-audit
 
-#### @Audit
+#### @SgAudit
 
-**Localização**: `br.com.seedgrid.audit.annotations.Audit`
+**Localização**: `br.com.seedgrid.audit.annotations.SgAudit`
 
 **Propósito**: Marcar métodos ou classes para auditoria automática.
 
@@ -1525,7 +1525,7 @@ public class ReportResource {
 **Uso em classe**:
 ```java
 @ApplicationScoped
-@Audit(operation = AuditOperationEnum.OTHER)
+@SgAudit(operation = AuditOperationEnum.OTHER)
 public class ProductService {
 
     public void createProduct(Product product) {
@@ -1540,17 +1540,17 @@ public class ProductService {
 @ApplicationScoped
 public class ProductService {
 
-    @Audit(operation = AuditOperationEnum.CREATE, entity = "Product", description = "Criação de novo produto")
+    @SgAudit(operation = AuditOperationEnum.CREATE, entity = "Product", description = "Criação de novo produto")
     public void createProduct(Product product) {
         productRepository.persist(product);
     }
 
-    @Audit(operation = AuditOperationEnum.UPDATE, entity = "Product")
+    @SgAudit(operation = AuditOperationEnum.UPDATE, entity = "Product")
     public void updateProduct(Product product) {
         productRepository.merge(product);
     }
 
-    @Audit(operation = AuditOperationEnum.DELETE, entity = "Product")
+    @SgAudit(operation = AuditOperationEnum.DELETE, entity = "Product")
     public void deleteProduct(Long id) {
         productRepository.deleteById(id);
     }
@@ -1936,7 +1936,7 @@ CREATE TABLE customers (
 ```java
 package com.meuapp.resource.master;
 
-import br.com.seedgrid.subdomaintenancy.annotations.MasterOnly;
+import br.com.seedgrid.subdomaintenancy.annotations.SgMasterOnly;
 import com.meuapp.entity.master.PaymentPlan;
 import com.meuapp.repository.master.PaymentPlanRepository;
 import jakarta.inject.Inject;
@@ -1945,7 +1945,7 @@ import jakarta.ws.rs.core.MediaType;
 import java.util.List;
 
 @Path("/api/payment-plans")
-@MasterOnly  // ← Aparece só no Swagger do master
+@SgMasterOnly  // ← Aparece só no Swagger do master
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class PaymentPlanResource {
@@ -1979,7 +1979,7 @@ public class PaymentPlanResource {
 ```java
 package com.meuapp.resource.tenant;
 
-import br.com.seedgrid.subdomaintenancy.annotations.TenantOnly;
+import br.com.seedgrid.subdomaintenancy.annotations.SgTenantOnly;
 import com.meuapp.entity.tenant.Product;
 import com.meuapp.repository.tenant.ProductRepository;
 import jakarta.inject.Inject;
@@ -1988,7 +1988,7 @@ import jakarta.ws.rs.core.MediaType;
 import java.util.List;
 
 @Path("/api/products")
-@TenantOnly  // ← Aparece só no Swagger dos tenants
+@SgTenantOnly  // ← Aparece só no Swagger dos tenants
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class ProductResource {
@@ -2186,9 +2186,9 @@ docker-compose up -d postgres mongodb
 |----------|----------|--------------|-----------|
 | Repositório Master | `@PersistenceUnit("master")` | ✅ SIM | Usa datasource master |
 | Repositório Tenant | Nenhuma | ✅ NÃO usar | Usa datasource padrão (tenant) |
-| Resource Master | `@MasterOnly` | ❌ Opcional | Para OpenAPI/Swagger |
-| Resource Tenant | `@TenantOnly` | ❌ Opcional | Para OpenAPI/Swagger |
-| Método Auditável | `@Audit(...)` | ❌ Opcional | Para auditoria automática |
+| Resource Master | `@SgMasterOnly` | ❌ Opcional | Para OpenAPI/Swagger |
+| Resource Tenant | `@SgTenantOnly` | ❌ Opcional | Para OpenAPI/Swagger |
+| Método Auditável | `@SgAudit(...)` | ❌ Opcional | Para auditoria automática |
 
 ---
 

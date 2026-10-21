@@ -30,7 +30,7 @@ import jakarta.inject.Inject;
  *   <li>a LEITURA via JPA devolve o valor em claro (decifrado);</li>
  *   <li>a BUSCA por hash acha o registro — inclusive tolerando formatacao (CPF com pontos) e
  *       caixa (e-mail em maiuscula), gracas a normalizacao CANONICAL/EMAIL;</li>
- *   <li>o MASCARAMENTO (@PersonalData) aplica a regra de cada campo ao serializar a resposta.</li>
+ *   <li>o MASCARAMENTO (@SgPersonalData) aplica a regra de cada campo ao serializar a resposta.</li>
  * </ol>
  */
 @QuarkusTest
@@ -111,7 +111,7 @@ class CustomerEncryptionTest {
         given().when().get("/api/customers/search?email=naoexiste@x.com")
                 .then().statusCode(404);
 
-        // (4) mascaramento: /{id}/masked aplica a regra @PersonalData de cada campo
+        // (4) mascaramento: /{id}/masked aplica a regra @SgPersonalData de cada campo
         given().when().get("/api/customers/" + id + "/masked")
                 .then()
                 .statusCode(200)
@@ -122,7 +122,7 @@ class CustomerEncryptionTest {
     }
 
     /**
-     * {@code name} e {@code phone} usam {@code @EncryptedField} SEM {@code searchField}: desde a
+     * {@code name} e {@code phone} usam {@code @SgEncryptedField} SEM {@code searchField}: desde a
      * lib 2026.07.08 o listener faz early-return — nao gera hash e nao exige campo-irmao
      * {@code <campo>Hash} (antes lancava). O persist sem erro ja' e' provado pelo POST do teste
      * principal; aqui provamos que NENHUMA coluna de hash existe (nem precisa existir) para eles.

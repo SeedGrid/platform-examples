@@ -118,7 +118,7 @@ class AuthAccessModeGuardianIT {
         String tokenB = login(emailB);
         String ownerB = text("SELECT public_id FROM users WHERE email = '" + emailB + "'");
         given().header("Authorization", "Bearer " + tokenB).get("/users/" + ownerB).then().statusCode(403);
-        // T5.15: a conta-cliente NAO administra empresas por /companies (so' a plataforma; @PlatformScope)
+        // T5.15: a conta-cliente NAO administra empresas por /companies (so' a plataforma; @SgPlatformScope)
         given().header("Authorization", "Bearer " + tokenB).get("/companies").then().statusCode(403);
         given().header("Authorization", "Bearer " + tokenB).contentType(ContentType.JSON)
                 .body(Map.of("corporateName", "Outra LTDA", "cpfCnpj", cnpj())).post("/companies")

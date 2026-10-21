@@ -32,7 +32,7 @@ class BackupSchemaBootstrapTest {
             assertTrue(tableExists(conn, "roles"), "tabela roles (security)");
             assertTrue(tableExists(conn, "export_jobs"), "tabela export_jobs (backup)");
             assertTrue(tableExists(conn, "export_artifacts"), "tabela export_artifacts (backup)");
-            assertTrue(tableExists(conn, "audit_log"), "tabela audit_log (seedgrid-audit-postgresql, usada pelo @Audit do ExportService)");
+            assertTrue(tableExists(conn, "audit_log"), "tabela audit_log (seedgrid-audit-postgresql, usada pelo @SgAudit do ExportService)");
             assertTrue(tableExists(conn, "notes"), "tabela notes (app host)");
 
             assertTrue(permissionExists(conn, "NOTE_READ"), "permission NOTE_READ semeada");

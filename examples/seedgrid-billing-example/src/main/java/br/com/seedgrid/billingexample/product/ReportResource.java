@@ -3,8 +3,8 @@ package br.com.seedgrid.billingexample.product;
 import java.time.Instant;
 import java.util.Map;
 
-import br.com.seedgrid.billing.annotations.ConsumesUsage;
-import br.com.seedgrid.billing.annotations.RequiresPlanFeature;
+import br.com.seedgrid.billing.annotations.SgConsumesUsage;
+import br.com.seedgrid.billing.annotations.SgRequiresPlanFeature;
 import io.quarkus.security.Authenticated;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
@@ -31,14 +31,14 @@ public class ReportResource {
     public static final String EXPORT = "REPORT_EXPORT";
 
     @POST
-    @ConsumesUsage(meter = ReportUsageMeters.REPORTS)
+    @SgConsumesUsage(meter = ReportUsageMeters.REPORTS)
     public Map<String, Object> generate() {
         return Map.of("status", "GENERATED", "generatedAt", Instant.now());
     }
 
     @GET
     @Path("/export")
-    @RequiresPlanFeature(value = EXPORT, message = "Exportar relatorios faz parte do plano Pro.")
+    @SgRequiresPlanFeature(value = EXPORT, message = "Exportar relatorios faz parte do plano Pro.")
     public Map<String, Object> export() {
         return Map.of("status", "EXPORTED", "format", "pdf");
     }

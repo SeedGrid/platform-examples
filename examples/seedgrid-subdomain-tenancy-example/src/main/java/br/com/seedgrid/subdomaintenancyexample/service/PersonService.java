@@ -3,8 +3,8 @@ package br.com.seedgrid.subdomaintenancyexample.service;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import br.com.seedgrid.audit.core.annotations.Audit;
-import br.com.seedgrid.privacy.masking.MaskRule;
+import br.com.seedgrid.audit.core.annotations.SgAudit;
+import br.com.seedgrid.privacy.masking.SgMaskRule;
 import br.com.seedgrid.audit.core.enums.AuditOperationEnum;
 import br.com.seedgrid.privacy.masking.MaskingStrategy;
 import br.com.seedgrid.subdomaintenancyexample.dto.PersonDTO;
@@ -44,8 +44,8 @@ public class PersonService {
     }
 
     @Transactional
-    @Audit(operation = AuditOperationEnum.CREATE, entityFqcn = "br.com.seedgrid.subdomaintenancyexample.entity.tenant.Person", description = "Create person", options = {
-        @MaskRule(field = "cpf", type = MaskingStrategy.FULL),
+    @SgAudit(operation = AuditOperationEnum.CREATE, entityFqcn = "br.com.seedgrid.subdomaintenancyexample.entity.tenant.Person", description = "Create person", options = {
+        @SgMaskRule(field = "cpf", type = MaskingStrategy.FULL),
     })
     public PersonDTO create(PersonDTO dto) {
         Person entity = Person.builder()
@@ -57,9 +57,9 @@ public class PersonService {
     }
 
     @Transactional
-    @Audit(operation = AuditOperationEnum.UPDATE, entityFqcn  = "br.com.seedgrid.subdomaintenancyexample.entity.tenant.Person", description = "Update person",
+    @SgAudit(operation = AuditOperationEnum.UPDATE, entityFqcn  = "br.com.seedgrid.subdomaintenancyexample.entity.tenant.Person", description = "Update person",
      options = {
-        @MaskRule(field = "cpf", type = MaskingStrategy.TEMPLATE, maskWith = "**#.***.###-*#")
+        @SgMaskRule(field = "cpf", type = MaskingStrategy.TEMPLATE, maskWith = "**#.***.###-*#")
     })
     public PersonDTO update(Long id, PersonDTO dto) {
         Person entity = repository.findByIdOptional(id)
@@ -70,7 +70,7 @@ public class PersonService {
     }
 
     @Transactional
-    @Audit(operation = AuditOperationEnum.DELETE, entityFqcn = "br.com.seedgrid.subdomaintenancyexample.entity.tenant.Person", description = "Delete person")
+    @SgAudit(operation = AuditOperationEnum.DELETE, entityFqcn = "br.com.seedgrid.subdomaintenancyexample.entity.tenant.Person", description = "Delete person")
     public void delete(Long id) {
         Person entity = repository.findByIdOptional(id)
                 .orElseThrow(() -> new NotFoundException("Person not found with id: " + id));

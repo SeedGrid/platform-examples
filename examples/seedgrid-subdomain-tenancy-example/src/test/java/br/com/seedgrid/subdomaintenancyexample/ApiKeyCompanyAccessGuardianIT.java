@@ -75,7 +75,7 @@ class ApiKeyCompanyAccessGuardianIT {
                     "seedgrid.subdomain-tenancy.tenant-header", "X-Tenant",
                     // Padrao do security (proactive=true), como no ApiKeyIsolationGuardianIT.
                     "quarkus.http.auth.proactive", "true",
-                    // setMode e' @Audit: com audit JPA (default do teste) a entidade de audit precisa estar no PU do tenant.
+                    // setMode e' @SgAudit: com audit JPA (default do teste) a entidade de audit precisa estar no PU do tenant.
                     "quarkus.hibernate-orm.packages", "${seedgrid.subdomain-tenancy.tenant.entity-packages},"
                             + "br.com.seedgrid.security.entities,br.com.seedgrid.backup.entities,"
                             + "br.com.seedgrid.apikeys.entities,br.com.seedgrid.audit.postgresql.entities");

@@ -17,7 +17,7 @@ import io.quarkus.test.junit.TestProfile;
  *
  * <p><b>O que protege:</b> no subdomain-tenancy ({@code dedicated-database}) o ADMIN de um tenant que passou a ter
  * 2 empresas continua administrando o proprio tenant: {@code /users}, {@code /roles}, {@code /companies} e
- * {@code /permissions} respondem 200 (o {@code @PlatformScope} e isento nesses recursos).</p>
+ * {@code /permissions} respondem 200 (o {@code @SgPlatformScope} e isento nesses recursos).</p>
  * <p><b>Por que existe:</b> com 2+ empresas no banco, a trava de plataforma (pensada para banco compartilhado entre
  * contas) passava a negar 403 ao dono do tenant em endpoints do proprio tenant.</p>
  * <p><b>Dano se quebrar:</b> tenant com varias empresas perde a administracao de usuarios, perfis e empresas.</p>
@@ -37,7 +37,7 @@ class TenantAdminTwoCompaniesGuardianIT extends ProactiveAuthGuardianBase {
 
     @Test
     void adminOfATenantWithTwoCompaniesStillAdministersTheTenant() throws Exception {
-        // alfa nasce com 1 empresa; a segunda entra direto no banco do tenant (o @Audit do POST /companies exige as
+        // alfa nasce com 1 empresa; a segunda entra direto no banco do tenant (o @SgAudit do POST /companies exige as
         // entidades de auditoria, que este exemplo nao carrega - nao e' o objeto do teste).
         exec(alfaDb, "INSERT INTO companies (cpf_cnpj, corporate_name, trade_name, public_id) VALUES ('11444777000161', "
                 + "'Filial LTDA', 'Filial', '" + java.util.UUID.randomUUID() + "')");

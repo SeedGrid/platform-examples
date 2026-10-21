@@ -6,7 +6,7 @@ import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
-import br.com.seedgrid.subdomaintenancy.annotations.TenantOnly;
+import br.com.seedgrid.subdomaintenancy.annotations.SgTenantOnly;
 import br.com.seedgrid.subdomaintenancyexample.dto.PersonDTO;
 import br.com.seedgrid.subdomaintenancyexample.service.PersonService;
 import io.smallrye.common.annotation.Blocking;
@@ -28,7 +28,7 @@ import jakarta.ws.rs.core.Response;
  * Accessible from {tenant}.seedgrid.com.br domains
  * The tenant is automatically resolved from the Host header
  *
- * This resource is marked with @TenantOnly, so it will only appear
+ * This resource is marked with @SgTenantOnly, so it will only appear
  * in the Swagger UI when accessed from a tenant domain.
  */
 @Path("/api/persons")
@@ -37,7 +37,7 @@ import jakarta.ws.rs.core.Response;
 @Tag(name = "Persons", description = "Person management (TENANT)")
 @Tag(name = "tenant-only", description = "Endpoints disponíveis apenas no contexto de tenant")
 @SecurityRequirement(name = "bearerAuth")
-@TenantOnly
+@SgTenantOnly
 @Blocking
 public class PersonResource {
 

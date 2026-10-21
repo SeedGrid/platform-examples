@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import br.com.seedgrid.privacy.masking.PersonalData;
+import br.com.seedgrid.privacy.masking.SgPersonalData;
 import br.com.seedgrid.privacy.masking.MaskingStrategy;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -40,7 +40,7 @@ public class Person  {
     private Long id;
 
     @Column(nullable = false, length = 200)
-    @PersonalData(type = MaskingStrategy.TEMPLATE, maskWith = "####****(LGPD)****########")
+    @SgPersonalData(type = MaskingStrategy.TEMPLATE, maskWith = "####****(LGPD)****########")
     private String name;
 
     @Column(nullable = true, length = 20)

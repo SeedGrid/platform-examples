@@ -78,7 +78,7 @@ class SessionRevocationGuardianIT {
         }
 
         /**
-         * Este exemplo nao carrega as entidades de auditoria (o @Audit de POST/PATCH /users estoura 500: ver
+         * Este exemplo nao carrega as entidades de auditoria (o @SgAudit de POST/PATCH /users estoura 500: ver
          * TenantAdminTwoCompaniesGuardianIT); estes substitutos descartam a escrita da auditoria SO' neste teste e
          * deixam o resto do fluxo (inclusive o marcador de revogacao) real.
          */

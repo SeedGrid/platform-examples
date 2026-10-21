@@ -2,7 +2,7 @@ package br.com.seedgrid.auditexample.controllers;
 
 import java.util.List;
 
-import br.com.seedgrid.audit.core.annotations.Audit;
+import br.com.seedgrid.audit.core.annotations.SgAudit;
 import br.com.seedgrid.audit.core.enums.AuditOperationEnum;
 import br.com.seedgrid.auditexample.entities.Customer;
 import br.com.seedgrid.auditexample.services.CustomerService;
@@ -31,34 +31,34 @@ public class CustomerController {
     }
 
     @GET
-    @Audit(operation = AuditOperationEnum.READ, entityFqcn = CUSTOMER_FQCN, description = "List customers")
+    @SgAudit(operation = AuditOperationEnum.READ, entityFqcn = CUSTOMER_FQCN, description = "List customers")
     public List<Customer> listAll() {
         return customerService.listAll();
     }
 
     @GET
     @Path("/{publicId}")
-    @Audit(operation = AuditOperationEnum.READ, entityFqcn = CUSTOMER_FQCN, description = "Get customer by public id")
+    @SgAudit(operation = AuditOperationEnum.READ, entityFqcn = CUSTOMER_FQCN, description = "Get customer by public id")
     public Customer findByPublicId(@PathParam("publicId") String publicId) {
         return customerService.findByPublicId(publicId);
     }
 
     @POST
-    @Audit(operation = AuditOperationEnum.CREATE, entityFqcn = CUSTOMER_FQCN, description = "Create customer")
+    @SgAudit(operation = AuditOperationEnum.CREATE, entityFqcn = CUSTOMER_FQCN, description = "Create customer")
     public Customer create(Customer customer) {
         return customerService.create(customer);
     }
 
     @PUT
     @Path("/{publicId}")
-    @Audit(operation = AuditOperationEnum.UPDATE, entityFqcn = CUSTOMER_FQCN, description = "Update customer")
+    @SgAudit(operation = AuditOperationEnum.UPDATE, entityFqcn = CUSTOMER_FQCN, description = "Update customer")
     public Customer update(@PathParam("publicId") String publicId, Customer customer) {
         return customerService.update(publicId, customer);
     }
 
     @DELETE
     @Path("/{publicId}")
-    @Audit(operation = AuditOperationEnum.DELETE, entityFqcn = CUSTOMER_FQCN, description = "Delete customer")
+    @SgAudit(operation = AuditOperationEnum.DELETE, entityFqcn = CUSTOMER_FQCN, description = "Delete customer")
     public Response delete(@PathParam("publicId") String publicId) {
         customerService.delete(publicId);
         return Response.noContent().build();

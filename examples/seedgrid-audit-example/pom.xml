@@ -83,7 +83,7 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- audit-core: a API que o codigo usa diretamente (@Audit, AuditOperationEnum).
+        <!-- audit-core: a API que o codigo usa diretamente (@SgAudit, AuditOperationEnum).
              Declarado explicitamente por boa pratica (nao depender do transitivo do provider). -->
         <dependency>
             <groupId>br.com.seedgrid</groupId>

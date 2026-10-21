@@ -1,6 +1,6 @@
 package br.com.seedgrid.auditexample.controllers;
 
-import br.com.seedgrid.audit.core.annotations.Audit;
+import br.com.seedgrid.audit.core.annotations.SgAudit;
 import br.com.seedgrid.audit.core.enums.AuditOperationEnum;
 import br.com.seedgrid.auditexample.entities.BusinessUnit;
 import br.com.seedgrid.auditexample.services.BusinessUnitService;
@@ -29,7 +29,7 @@ public class BusinessUnitController {
 
     @GET
     @Path("/{publicId}")
-    @Audit(
+    @SgAudit(
             operation = AuditOperationEnum.READ,
             entityFqcn = BUSINESS_UNIT_FQCN,
             description = "Get business unit by public id")
@@ -38,7 +38,7 @@ public class BusinessUnitController {
     }
 
     @POST
-    @Audit(
+    @SgAudit(
             operation = AuditOperationEnum.CREATE,
             entityFqcn = BUSINESS_UNIT_FQCN,
             description = "Create business unit")
@@ -48,7 +48,7 @@ public class BusinessUnitController {
 
     @DELETE
     @Path("/{publicId}")
-    @Audit(
+    @SgAudit(
             operation = AuditOperationEnum.DELETE,
             entityFqcn = BUSINESS_UNIT_FQCN,
             description = "Delete business unit")

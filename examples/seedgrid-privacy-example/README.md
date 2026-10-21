@@ -7,20 +7,20 @@ JPA (`@Convert`, `@EntityListeners`) e por um bean de mascaramento.
 
 ## O que a lib oferece (e este exemplo demonstra)
 
-1. **Criptografia at-rest (AES-256-GCM), reversível** — `@EncryptedField` +
+1. **Criptografia at-rest (AES-256-GCM), reversível** — `@SgEncryptedField` +
    `@Convert(EncryptedFieldAttributeConverter.class)` cifram/decifram um campo `String` de forma
    transparente. No banco fica `v1:iv:ciphertext`; via JPA você lê o valor em claro.
 2. **Busca exata por hash (HMAC-SHA256), determinística** — o `EncryptedFieldListener`
    (`@PrePersist`/`@PreUpdate`) preenche um campo-irmão `*_hash` com o hash do valor normalizado.
    Você busca por igualdade com um lookup indexado, **sem descriptografar a tabela inteira**.
    A normalização (`SearchNormalization.EMAIL` / `CANONICAL`) faz a busca tolerar caixa e pontuação.
-3. **Mascaramento de PII (`@PersonalData` + `PersonalDataSanitizer`)** — produz uma cópia do objeto
+3. **Mascaramento de PII (`@SgPersonalData` + `PersonalDataSanitizer`)** — produz uma cópia do objeto
    com a PII mascarada (para log, auditoria, telas restritas), sem alterar a entidade original.
 
 ## Domínio do exemplo
 
 Entidade `Customer` com PII cifrada: `name`, `email`, `cpf`, `phone`. `email` e `cpf` também são
-pesquisáveis por hash (`email_hash`, `cpf_hash`). `name` e `phone` usam `@EncryptedField` **sem**
+pesquisáveis por hash (`email_hash`, `cpf_hash`). `name` e `phone` usam `@SgEncryptedField` **sem**
 `searchField`: modo "cifrado mas não pesquisável" — nenhum hash é gerado e não é preciso
 campo-irmão `*Hash` (comportamento desde a 2026.07.08).
 
@@ -91,7 +91,7 @@ mvn -o test
   em claro; e o flag de criptografia está ligado.
 - `CustomerEncryptionTest` — fluxo HTTP completo provando os quatro contratos: (1) coluna cifrada no
   banco (query nativa via JDBC mostra `v1:...`, nunca o CPF cru), (2) leitura em claro pelo JPA,
-  (3) busca por hash tolerando caixa/pontuação, (4) mascaramento `@PersonalData` na resposta.
+  (3) busca por hash tolerando caixa/pontuação, (4) mascaramento `@SgPersonalData` na resposta.
 
 ## O que trocar para adaptar
 

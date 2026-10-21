@@ -1,7 +1,7 @@
 package br.com.seedgrid.auditexample.controllers;
 
-import br.com.seedgrid.audit.core.annotations.Audit;
-import br.com.seedgrid.audit.core.annotations.AuditLookup;
+import br.com.seedgrid.audit.core.annotations.SgAudit;
+import br.com.seedgrid.audit.core.annotations.SgAuditLookup;
 import br.com.seedgrid.audit.core.enums.AuditOperationEnum;
 import br.com.seedgrid.auditexample.entities.LegacyProduct;
 import br.com.seedgrid.auditexample.services.LegacyProductService;
@@ -30,19 +30,19 @@ public class LegacyProductController {
 
     @GET
     @Path("/{externalCode}")
-    @Audit(
+    @SgAudit(
             operation = AuditOperationEnum.READ,
             entityFqcn = LEGACY_PRODUCT_FQCN,
             description = "Get legacy product by external code",
             lookups = {
-                    @AuditLookup(field = "externalCode")
+                    @SgAuditLookup(field = "externalCode")
             })
     public LegacyProduct findByExternalCode(@PathParam("externalCode") String externalCode) {
         return legacyProductService.findByExternalCode(externalCode);
     }
 
     @POST
-    @Audit(
+    @SgAudit(
             operation = AuditOperationEnum.CREATE,
             entityFqcn = LEGACY_PRODUCT_FQCN,
             description = "Create legacy product")
@@ -52,12 +52,12 @@ public class LegacyProductController {
 
     @DELETE
     @Path("/{externalCode}")
-    @Audit(
+    @SgAudit(
             operation = AuditOperationEnum.DELETE,
             entityFqcn = LEGACY_PRODUCT_FQCN,
             description = "Delete legacy product by external code",
             lookups = {
-                    @AuditLookup(field = "externalCode")
+                    @SgAuditLookup(field = "externalCode")
             })
     public Response delete(@PathParam("externalCode") String externalCode) {
         legacyProductService.deleteByExternalCode(externalCode);
