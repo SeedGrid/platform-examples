@@ -7,8 +7,8 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 import br.com.seedgrid.filemanagement.domains.FileMetadata;
 import br.com.seedgrid.filemanagement.domains.StorageKey;
-import br.com.seedgrid.filemanagement.spi.StorageException;
-import br.com.seedgrid.filemanagement.spi.StorageNotFoundException;
+import br.com.seedgrid.filemanagement.spis.StorageException;
+import br.com.seedgrid.filemanagement.spis.StorageNotFoundException;
 import br.com.seedgrid.filemanagementexample.dto.DocumentMetadataResponse;
 import br.com.seedgrid.filemanagementexample.dto.StoreDocumentRequest;
 import br.com.seedgrid.filemanagementexample.dto.StoredDocumentResponse;

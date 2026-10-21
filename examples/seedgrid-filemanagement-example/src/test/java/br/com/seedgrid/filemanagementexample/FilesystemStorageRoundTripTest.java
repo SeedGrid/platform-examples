@@ -20,8 +20,8 @@ import br.com.seedgrid.filemanagement.domains.FileMetadata;
 import br.com.seedgrid.filemanagement.domains.StorageKey;
 import br.com.seedgrid.filemanagement.domains.StorageOptions;
 import br.com.seedgrid.filemanagement.services.FileStorageRegistry;
-import br.com.seedgrid.filemanagement.spi.FileStorage;
-import br.com.seedgrid.filemanagement.spi.StorageNotFoundException;
+import br.com.seedgrid.filemanagement.spis.FileStorage;
+import br.com.seedgrid.filemanagement.spis.StorageNotFoundException;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 
