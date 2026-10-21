@@ -75,7 +75,7 @@
         <dependency>
             <groupId>br.com.seedgrid</groupId>
             <artifactId>seedgrid-privacy</artifactId>
-            <version>2026.07.08</version>
+            <version>2026.07.27</version>
         </dependency>
 
         <dependency>
