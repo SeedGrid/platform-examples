@@ -62,7 +62,7 @@
         <dependency>
             <groupId>br.com.seedgrid</groupId>
             <artifactId>seedgrid-cache-core</artifactId>
-            <version>2026.07.08</version>
+            <version>2026.10.13</version>
         </dependency>
 
         <dependency>

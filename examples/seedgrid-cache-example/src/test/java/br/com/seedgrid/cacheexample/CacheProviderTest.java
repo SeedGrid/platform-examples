@@ -8,8 +8,8 @@ import java.time.Duration;
 
 import org.junit.jupiter.api.Test;
 
-import br.com.seedgrid.cache.core.commons.spi.SeedGridCacheProvider;
-import br.com.seedgrid.cache.core.commons.spi.impl.DefaultSeedGridCache;
+import br.com.seedgrid.cache.core.commons.spis.SeedGridCacheProvider;
+import br.com.seedgrid.cache.core.commons.spis.impl.DefaultSeedGridCache;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 
