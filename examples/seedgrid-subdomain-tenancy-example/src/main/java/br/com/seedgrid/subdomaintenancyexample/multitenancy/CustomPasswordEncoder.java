@@ -1,6 +1,6 @@
 package br.com.seedgrid.subdomaintenancyexample.multitenancy;
 
-import br.com.seedgrid.subdomaintenancy.spi.PasswordEncoder;
+import br.com.seedgrid.subdomaintenancy.spis.PasswordEncoder;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.mindrot.jbcrypt.BCrypt;
 
