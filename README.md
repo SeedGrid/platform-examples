@@ -105,6 +105,12 @@ versão da tenancy e esquecer a do security, que só aparece muito depois e long
 | **seedgrid-resilience** | Circuit breaker, retry e timeout com defaults sensatos | [`seedgrid-resilience-example`](examples/seedgrid-resilience-example) |
 | **seedgrid-whatsapp** | Envio por WhatsApp, agnóstico de provedor (Evolution API ou Cloud API) | [`seedgrid-whatsapp-example`](examples/seedgrid-whatsapp-example) |
 
+### Dados de referência
+
+| extensão | o que resolve | exemplo |
+|---|---|---|
+| **seedgrid-cities** | Países, estados e cidades do Brasil (5 / 27 / 5.570) semeados por migration, com métodos auxiliares (`BrazilGeo`) e REST opcional | [`seedgrid-cities-example`](examples/seedgrid-cities-example) |
+
 ✅ = verificado: os passos acima foram executados a partir de banco vazio e a
 aplicação subiu. Os quatro marcados passaram por isso; os demais trazem o README que
 já tinham e entram na próxima rodada. Se esbarrar em algo antes disso, abra uma issue.
