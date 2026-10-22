@@ -58,6 +58,33 @@ public class ExampleResource {
     }
 
     @GET
+    @Path("/burst-window")
+    @Operation(summary = "Janela fixa de 20 chamadas / 60s: usado pelo teste de concorrencia")
+    @SgRateLimit(
+            configKey = "burst-window",
+            permits = 20,
+            window = 60,
+            windowUnit = ChronoUnit.SECONDS,
+            algorithm = RateLimitAlgorithm.FIXED_WINDOW)
+    public Response burstWindow() {
+        return Response.ok(Map.of("status", "ok")).build();
+    }
+
+    @GET
+    @Path("/burst-bucket")
+    @Operation(summary = "Token bucket com rajada de 10: usado pelo teste de concorrencia")
+    @SgRateLimit(
+            configKey = "burst-bucket",
+            permits = 1,
+            window = 1,
+            windowUnit = ChronoUnit.MINUTES,
+            algorithm = RateLimitAlgorithm.TOKEN_BUCKET,
+            burstCapacity = 10)
+    public Response burstBucket() {
+        return Response.ok(Map.of("status", "ok")).build();
+    }
+
+    @GET
     @Path("/catalog/{id}")
     @Operation(summary = "Busca um produto via CatalogService, protegido por circuit breaker")
     public Response catalog(@PathParam("id") String id) {
