@@ -144,7 +144,7 @@ class BillingCheckoutWebhookFlowTest {
 
     private String permissionPublicId(String name) throws Exception {
         try (var conn = dataSource.getConnection();
-                var ps = conn.prepareStatement("select public_id from permissions where name = ?")) {
+                var ps = conn.prepareStatement("select public_id from sg_permissions where name = ?")) {
             ps.setString(1, name);
             try (var rs = ps.executeQuery()) {
                 rs.next();

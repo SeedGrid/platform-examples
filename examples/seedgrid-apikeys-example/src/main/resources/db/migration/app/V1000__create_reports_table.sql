@@ -13,16 +13,16 @@ CREATE TABLE reports (
 -- =========================
 -- PERMISSIONS do dominio do exemplo
 -- =========================
-INSERT INTO permissions (name, description, public_id) VALUES
+INSERT INTO sg_permissions (name, description, public_id) VALUES
     ('REPORT_READ', 'Ler relatorios', gen_random_uuid()::text),
     ('REPORT_CREATE', 'Criar relatorios', gen_random_uuid()::text)
 ON CONFLICT (name) DO NOTHING;
 
 -- ADMIN (humano) recebe as duas
-INSERT INTO role_permissions (role_id, permission_id)
+INSERT INTO sg_role_permissions (role_id, permission_id)
 SELECT r.id, p.id
-FROM roles r
-CROSS JOIN permissions p
+FROM sg_roles r
+CROSS JOIN sg_permissions p
 WHERE r.name = 'ADMIN'
   AND p.name IN ('REPORT_READ', 'REPORT_CREATE')
 ON CONFLICT DO NOTHING;
@@ -30,17 +30,17 @@ ON CONFLICT DO NOTHING;
 -- =========================
 -- ROLE DE INTEGRACAO: so pode LER (principio do menor privilegio pra API keys M2M)
 -- =========================
--- roles.name so tem unique constraint PLANO ate a V223 do security; depois disso vira indice
--- unico PARCIAL (uk_roles_name_global, WHERE company_id IS NULL) para permitir roles por conta.
+-- sg_roles.name so tem unique constraint PLANO ate a V223 do security; depois disso vira indice
+-- unico PARCIAL (uk_sg_roles_name_global, WHERE company_id IS NULL) para permitir roles por conta.
 -- O ON CONFLICT target precisa repetir essa mesma condicao pra Postgres achar o arbiter.
-INSERT INTO roles (name, description, public_id, for_integration) VALUES
+INSERT INTO sg_roles (name, description, public_id, for_integration) VALUES
     ('REPORT_READER', 'Integracao M2M com acesso somente leitura a relatorios', gen_random_uuid()::text, TRUE)
 ON CONFLICT (name) WHERE company_id IS NULL DO NOTHING;
 
-INSERT INTO role_permissions (role_id, permission_id)
+INSERT INTO sg_role_permissions (role_id, permission_id)
 SELECT r.id, p.id
-FROM roles r
-CROSS JOIN permissions p
+FROM sg_roles r
+CROSS JOIN sg_permissions p
 WHERE r.name = 'REPORT_READER'
   AND p.name = 'REPORT_READ'
 ON CONFLICT DO NOTHING;

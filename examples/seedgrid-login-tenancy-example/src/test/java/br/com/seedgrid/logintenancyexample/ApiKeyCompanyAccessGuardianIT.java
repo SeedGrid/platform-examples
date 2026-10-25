@@ -79,20 +79,20 @@ class ApiKeyCompanyAccessGuardianIT {
         signup(emailA, cnpjA, "Empresa A");
         signup(emailB, cnpjB, "Empresa B");
         signup(emailC, cnpjC, "Empresa C");
-        long companyA = scalar("SELECT id FROM companies WHERE cpf_cnpj = '" + cnpjA + "'");
-        long companyB = scalar("SELECT id FROM companies WHERE cpf_cnpj = '" + cnpjB + "'");
-        long companyC = scalar("SELECT id FROM companies WHERE cpf_cnpj = '" + cnpjC + "'");
-        publicIdA = text("SELECT public_id FROM companies WHERE id = " + companyA);
-        publicIdB = text("SELECT public_id FROM companies WHERE id = " + companyB);
+        long companyA = scalar("SELECT id FROM sg_companies WHERE cpf_cnpj = '" + cnpjA + "'");
+        long companyB = scalar("SELECT id FROM sg_companies WHERE cpf_cnpj = '" + cnpjB + "'");
+        long companyC = scalar("SELECT id FROM sg_companies WHERE cpf_cnpj = '" + cnpjC + "'");
+        publicIdA = text("SELECT public_id FROM sg_companies WHERE id = " + companyA);
+        publicIdB = text("SELECT public_id FROM sg_companies WHERE id = " + companyB);
         String tokenA = login(emailA);
         String tokenB = login(emailB);
         QuarkusTransaction.requiringNew().run(() -> {
-            sql("INSERT INTO permissions (name, description, public_id) VALUES ('PROBE_READ', 'probe', '"
+            sql("INSERT INTO sg_permissions (name, description, public_id) VALUES ('PROBE_READ', 'probe', '"
                     + UUID.randomUUID() + "') ON CONFLICT DO NOTHING");
             for (long company : new long[] { companyA, companyB }) {
-                sql("INSERT INTO roles (name, description, public_id, for_integration, company_id) VALUES ('" + ROLE
+                sql("INSERT INTO sg_roles (name, description, public_id, for_integration, company_id) VALUES ('" + ROLE
                         + "', 'probe', '" + UUID.randomUUID() + "', TRUE, " + company + ")");
-                sql("INSERT INTO role_permissions (role_id, permission_id) SELECT r.id, p.id FROM roles r, permissions p "
+                sql("INSERT INTO sg_role_permissions (role_id, permission_id) SELECT r.id, p.id FROM sg_roles r, sg_permissions p "
                         + "WHERE r.name = '" + ROLE + "' AND r.company_id = " + company + " AND p.name = 'PROBE_READ'");
             }
         });
@@ -101,8 +101,8 @@ class ApiKeyCompanyAccessGuardianIT {
         keyB = createKey(tokenB);
         // A conta de A passa a ter tambem a empresa C (depois de criar a chave, que exige usuario de 1 empresa): sem
         // isso "DISABLED" na unica empresa da conta e' recusado (409 COMPANY_ACCESS_ALL_DISABLED, regra do security).
-        long ownerA = scalar("SELECT id FROM users WHERE email = '" + emailA + "'");
-        update("INSERT INTO user_companies (user_id, company_id) VALUES (" + ownerA + ", " + companyC + ")");
+        long ownerA = scalar("SELECT id FROM sg_users WHERE email = '" + emailA + "'");
+        update("INSERT INTO sg_user_companies (user_id, company_id) VALUES (" + ownerA + ", " + companyC + ")");
     }
 
     @AfterEach

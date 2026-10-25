@@ -39,7 +39,7 @@ class TenantAdminTwoCompaniesGuardianIT extends ProactiveAuthGuardianBase {
     void adminOfATenantWithTwoCompaniesStillAdministersTheTenant() throws Exception {
         // alfa nasce com 1 empresa; a segunda entra direto no banco do tenant (o @SgAudit do POST /companies exige as
         // entidades de auditoria, que este exemplo nao carrega - nao e' o objeto do teste).
-        exec(alfaDb, "INSERT INTO companies (cpf_cnpj, corporate_name, trade_name, public_id) VALUES ('11444777000161', "
+        exec(alfaDb, "INSERT INTO sg_companies (cpf_cnpj, corporate_name, trade_name, public_id) VALUES ('11444777000161', "
                 + "'Filial LTDA', 'Filial', '" + java.util.UUID.randomUUID() + "')");
 
         for (String path : new String[] { "/users", "/roles", "/companies", "/permissions" }) {

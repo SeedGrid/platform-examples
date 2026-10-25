@@ -28,11 +28,11 @@ class BackupSchemaBootstrapTest {
     @Test
     void migrationsCreateSchemaAndSeedPermissions() throws Exception {
         try (Connection conn = dataSource.getConnection()) {
-            assertTrue(tableExists(conn, "users"), "tabela users (security)");
-            assertTrue(tableExists(conn, "roles"), "tabela roles (security)");
-            assertTrue(tableExists(conn, "export_jobs"), "tabela export_jobs (backup)");
-            assertTrue(tableExists(conn, "export_artifacts"), "tabela export_artifacts (backup)");
-            assertTrue(tableExists(conn, "audit_log"), "tabela audit_log (seedgrid-audit-postgresql, usada pelo @SgAudit do ExportService)");
+            assertTrue(tableExists(conn, "sg_users"), "tabela users (security)");
+            assertTrue(tableExists(conn, "sg_roles"), "tabela roles (security)");
+            assertTrue(tableExists(conn, "sg_export_jobs"), "tabela export_jobs (backup)");
+            assertTrue(tableExists(conn, "sg_export_artifacts"), "tabela export_artifacts (backup)");
+            assertTrue(tableExists(conn, "sg_audit_log"), "tabela audit_log (seedgrid-audit-postgresql, usada pelo @SgAudit do ExportService)");
             assertTrue(tableExists(conn, "notes"), "tabela notes (app host)");
 
             assertTrue(permissionExists(conn, "NOTE_READ"), "permission NOTE_READ semeada");
@@ -55,7 +55,7 @@ class BackupSchemaBootstrapTest {
     }
 
     private boolean permissionExists(Connection conn, String name) throws Exception {
-        try (var ps = conn.prepareStatement("SELECT 1 FROM permissions WHERE name = ?")) {
+        try (var ps = conn.prepareStatement("SELECT 1 FROM sg_permissions WHERE name = ?")) {
             ps.setString(1, name);
             try (ResultSet rs = ps.executeQuery()) {
                 return rs.next();
@@ -65,9 +65,9 @@ class BackupSchemaBootstrapTest {
 
     private boolean adminHasPermission(Connection conn, String permissionName) throws Exception {
         String sql = """
-                SELECT 1 FROM role_permissions rp
-                JOIN roles r ON r.id = rp.role_id
-                JOIN permissions p ON p.id = rp.permission_id
+                SELECT 1 FROM sg_role_permissions rp
+                JOIN sg_roles r ON r.id = rp.role_id
+                JOIN sg_permissions p ON p.id = rp.permission_id
                 WHERE r.name = 'ADMIN' AND p.name = ?
                 """;
         try (var ps = conn.prepareStatement(sql)) {

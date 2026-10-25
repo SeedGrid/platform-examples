@@ -114,8 +114,8 @@ class ApiKeyCompanyAccessGuardianIT {
         provision("beta", "11444777000161");
         seedIntegrationRole(alfaDb);
         seedIntegrationRole(betaDb);
-        alfaCompany = text(alfaDb, "SELECT public_id FROM companies ORDER BY id LIMIT 1");
-        betaCompany = text(betaDb, "SELECT public_id FROM companies ORDER BY id LIMIT 1");
+        alfaCompany = text(alfaDb, "SELECT public_id FROM sg_companies ORDER BY id LIMIT 1");
+        betaCompany = text(betaDb, "SELECT public_id FROM sg_companies ORDER BY id LIMIT 1");
 
         // As chaves nascem ANTES de mudar o estado (mudar o estado derruba os JWT da empresa, nao as chaves).
         alfaKey = createKey(HOST_ALFA, login(HOST_ALFA, "admin@alfa.test"));
@@ -196,13 +196,13 @@ class ApiKeyCompanyAccessGuardianIT {
     }
 
     private void addSecondCompanyToAlfaAdmin() throws Exception {
-        if (Integer.parseInt(text(alfaDb, "SELECT count(*) FROM companies")) > 1) {
+        if (Integer.parseInt(text(alfaDb, "SELECT count(*) FROM sg_companies")) > 1) {
             return;
         }
-        exec(alfaDb, "INSERT INTO companies (corporate_name, trade_name, cpf_cnpj, person_type, public_id, active) "
+        exec(alfaDb, "INSERT INTO sg_companies (corporate_name, trade_name, cpf_cnpj, person_type, public_id, active) "
                 + "SELECT 'Segunda LTDA', 'Segunda', '99888777000166', person_type, '" + UUID.randomUUID()
-                + "', TRUE FROM companies ORDER BY id LIMIT 1");
-        exec(alfaDb, "INSERT INTO user_companies (user_id, company_id) SELECT u.id, c.id FROM users u, companies c "
+                + "', TRUE FROM sg_companies ORDER BY id LIMIT 1");
+        exec(alfaDb, "INSERT INTO sg_user_companies (user_id, company_id) SELECT u.id, c.id FROM sg_users u, sg_companies c "
                 + "WHERE u.email = 'admin@alfa.test' AND c.cpf_cnpj = '99888777000166'");
     }
 
@@ -249,11 +249,11 @@ class ApiKeyCompanyAccessGuardianIT {
     }
 
     private void seedIntegrationRole(String db) throws Exception {
-        exec(db, "INSERT INTO permissions (name, description, public_id) VALUES ('PROBE_READ', 'probe', '"
+        exec(db, "INSERT INTO sg_permissions (name, description, public_id) VALUES ('PROBE_READ', 'probe', '"
                 + UUID.randomUUID() + "') ON CONFLICT DO NOTHING");
-        exec(db, "INSERT INTO roles (name, description, public_id, for_integration) VALUES ('" + ROLE
+        exec(db, "INSERT INTO sg_roles (name, description, public_id, for_integration) VALUES ('" + ROLE
                 + "', 'probe', '" + UUID.randomUUID() + "', TRUE) ON CONFLICT DO NOTHING");
-        exec(db, "INSERT INTO role_permissions (role_id, permission_id) SELECT r.id, p.id FROM roles r, permissions p "
+        exec(db, "INSERT INTO sg_role_permissions (role_id, permission_id) SELECT r.id, p.id FROM sg_roles r, sg_permissions p "
                 + "WHERE r.name = '" + ROLE + "' AND p.name = 'PROBE_READ' ON CONFLICT DO NOTHING");
     }
 

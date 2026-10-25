@@ -75,12 +75,12 @@ class ApiKeyIsolationGuardianIT {
 
         // Mesmo nome de role de integracao nas duas empresas (o indice unico por empresa permite), mesma permissao.
         QuarkusTransaction.requiringNew().run(() -> {
-            sql("INSERT INTO permissions (name, description, public_id) VALUES ('PROBE_READ', 'probe', '"
+            sql("INSERT INTO sg_permissions (name, description, public_id) VALUES ('PROBE_READ', 'probe', '"
                     + UUID.randomUUID() + "') ON CONFLICT DO NOTHING");
             for (long company : new long[] { companyA, companyB }) {
-                sql("INSERT INTO roles (name, description, public_id, for_integration, company_id) VALUES ('" + ROLE
+                sql("INSERT INTO sg_roles (name, description, public_id, for_integration, company_id) VALUES ('" + ROLE
                         + "', 'probe', '" + UUID.randomUUID() + "', TRUE, " + company + ")");
-                sql("INSERT INTO role_permissions (role_id, permission_id) SELECT r.id, p.id FROM roles r, permissions p "
+                sql("INSERT INTO sg_role_permissions (role_id, permission_id) SELECT r.id, p.id FROM sg_roles r, sg_permissions p "
                         + "WHERE r.name = '" + ROLE + "' AND r.company_id = " + company + " AND p.name = 'PROBE_READ'");
             }
         });
@@ -121,7 +121,7 @@ class ApiKeyIsolationGuardianIT {
     @Test
     void tokenOfACannotCreateKeyForRoleOfAnotherCompany() {
         QuarkusTransaction.requiringNew().run(() -> sql(
-                "INSERT INTO roles (name, description, public_id, for_integration, company_id) VALUES ('ONLY_B_ROLE', 'x', '"
+                "INSERT INTO sg_roles (name, description, public_id, for_integration, company_id) VALUES ('ONLY_B_ROLE', 'x', '"
                         + UUID.randomUUID() + "', TRUE, " + companyB + ")"));
         Response r = given().header("Authorization", "Bearer " + tokenA).contentType(ContentType.JSON)
                 .body(Map.of("name", "k", "expiresDays", 5)).post("/apikeys/role/ONLY_B_ROLE");
@@ -133,23 +133,23 @@ class ApiKeyIsolationGuardianIT {
     void keyStopsWorkingWhenRoleLosesIntegrationFlagOrIsInactive() {
         String key = createKey(tokenA);
         given().header("x-api-key", key).get("/probe/permission").then().statusCode(200);
-        update("UPDATE roles SET for_integration = FALSE WHERE name = '" + ROLE + "' AND company_id = " + companyA);
+        update("UPDATE sg_roles SET for_integration = FALSE WHERE name = '" + ROLE + "' AND company_id = " + companyA);
         given().header("x-api-key", key).get("/probe/permission").then().statusCode(401);
-        update("UPDATE roles SET for_integration = TRUE, active = FALSE WHERE name = '" + ROLE + "' AND company_id = "
+        update("UPDATE sg_roles SET for_integration = TRUE, active = FALSE WHERE name = '" + ROLE + "' AND company_id = "
                 + companyA);
         given().header("x-api-key", key).get("/probe/permission").then().statusCode(401);
-        update("UPDATE roles SET active = TRUE WHERE name = '" + ROLE + "' AND company_id = " + companyA);
+        update("UPDATE sg_roles SET active = TRUE WHERE name = '" + ROLE + "' AND company_id = " + companyA);
         given().header("x-api-key", key).get("/probe/permission").then().statusCode(200);
     }
 
     @Test
     void scopedKeyStopsWhenOwnerLosesMembership() {
         String key = createKey(tokenA);
-        update("UPDATE user_companies SET active = FALSE WHERE company_id = " + companyA);
+        update("UPDATE sg_user_companies SET active = FALSE WHERE company_id = " + companyA);
         try {
             given().header("x-api-key", key).get("/probe/permission").then().statusCode(401);
         } finally {
-            update("UPDATE user_companies SET active = TRUE WHERE company_id = " + companyA);
+            update("UPDATE sg_user_companies SET active = TRUE WHERE company_id = " + companyA);
         }
         given().header("x-api-key", key).get("/probe/permission").then().statusCode(200);
     }
@@ -181,7 +181,7 @@ class ApiKeyIsolationGuardianIT {
 
     private long companyId(String cnpj) {
         return QuarkusTransaction.requiringNew().call(() -> ((Number) em
-                .createNativeQuery("SELECT id FROM companies WHERE cpf_cnpj = :c").setParameter("c", cnpj)
+                .createNativeQuery("SELECT id FROM sg_companies WHERE cpf_cnpj = :c").setParameter("c", cnpj)
                 .getSingleResult()).longValue());
     }
 

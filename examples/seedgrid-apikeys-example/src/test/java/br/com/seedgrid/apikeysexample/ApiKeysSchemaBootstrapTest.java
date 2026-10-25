@@ -28,9 +28,9 @@ class ApiKeysSchemaBootstrapTest {
     @Test
     void migrationsCreateSchemaAndSeedIntegrationRole() throws Exception {
         try (Connection conn = dataSource.getConnection()) {
-            assertTrue(tableExists(conn, "users"), "tabela users (security)");
-            assertTrue(tableExists(conn, "roles"), "tabela roles (security)");
-            assertTrue(tableExists(conn, "api_keys"), "tabela api_keys (apikeys)");
+            assertTrue(tableExists(conn, "sg_users"), "tabela users (security)");
+            assertTrue(tableExists(conn, "sg_roles"), "tabela roles (security)");
+            assertTrue(tableExists(conn, "sg_api_keys"), "tabela api_keys (apikeys)");
             assertTrue(tableExists(conn, "reports"), "tabela reports (app host)");
             assertTrue(roleExists(conn, "REPORT_READER"), "role de integracao REPORT_READER semeada");
             assertTrue(permissionExists(conn, "REPORT_READ"), "permission REPORT_READ semeada");
@@ -44,7 +44,7 @@ class ApiKeysSchemaBootstrapTest {
     }
 
     private boolean roleExists(Connection conn, String name) throws Exception {
-        try (var ps = conn.prepareStatement("SELECT 1 FROM roles WHERE name = ?")) {
+        try (var ps = conn.prepareStatement("SELECT 1 FROM sg_roles WHERE name = ?")) {
             ps.setString(1, name);
             try (ResultSet rs = ps.executeQuery()) {
                 return rs.next();
@@ -53,7 +53,7 @@ class ApiKeysSchemaBootstrapTest {
     }
 
     private boolean permissionExists(Connection conn, String name) throws Exception {
-        try (var ps = conn.prepareStatement("SELECT 1 FROM permissions WHERE name = ?")) {
+        try (var ps = conn.prepareStatement("SELECT 1 FROM sg_permissions WHERE name = ?")) {
             ps.setString(1, name);
             try (ResultSet rs = ps.executeQuery()) {
                 return rs.next();

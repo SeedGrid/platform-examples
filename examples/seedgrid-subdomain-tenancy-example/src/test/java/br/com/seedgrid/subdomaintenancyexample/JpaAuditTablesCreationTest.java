@@ -56,12 +56,12 @@ public class JpaAuditTablesCreationTest {
         System.out.println("Tables found in MASTER database: " + tables);
 
         // Verify audit tables exist
-        assertTrue(tables.contains("audit_log"),
-            "Table 'audit_log' should exist in master database. Found tables: " + tables);
-        assertTrue(tables.contains("audit_log_entities"),
-            "Table 'audit_log_entities' should exist in master database. Found tables: " + tables);
-        assertTrue(tables.contains("audit_log_users"),
-            "Table 'audit_log_users' should exist in master database. Found tables: " + tables);
+        assertTrue(tables.contains("sg_audit_log"),
+            "Table 'sg_audit_log' should exist in master database. Found tables: " + tables);
+        assertTrue(tables.contains("sg_audit_log_entities"),
+            "Table 'sg_audit_log_entities' should exist in master database. Found tables: " + tables);
+        assertTrue(tables.contains("sg_audit_log_users"),
+            "Table 'sg_audit_log_users' should exist in master database. Found tables: " + tables);
     }
 
     private Set<String> getTablesInDatabase(DataSource dataSource) throws Exception {

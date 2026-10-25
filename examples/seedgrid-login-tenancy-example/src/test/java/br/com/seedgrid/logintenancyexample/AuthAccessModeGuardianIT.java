@@ -73,14 +73,14 @@ class AuthAccessModeGuardianIT {
         signup(emailA, cnpjA, "Empresa A");
         signup(emailB, cnpjB, "Empresa B");
         signup(emailC, cnpjC, "Empresa C");
-        long companyA = scalar("SELECT id FROM companies WHERE cpf_cnpj = '" + cnpjA + "'");
-        long companyC = scalar("SELECT id FROM companies WHERE cpf_cnpj = '" + cnpjC + "'");
-        publicIdA = text("SELECT public_id FROM companies WHERE id = " + companyA);
-        publicIdB = text("SELECT public_id FROM companies WHERE cpf_cnpj = '" + cnpjB + "'");
+        long companyA = scalar("SELECT id FROM sg_companies WHERE cpf_cnpj = '" + cnpjA + "'");
+        long companyC = scalar("SELECT id FROM sg_companies WHERE cpf_cnpj = '" + cnpjC + "'");
+        publicIdA = text("SELECT public_id FROM sg_companies WHERE id = " + companyA);
+        publicIdB = text("SELECT public_id FROM sg_companies WHERE cpf_cnpj = '" + cnpjB + "'");
         // A conta de A passa a ter tambem a empresa C, depois do login (que escopa na unica empresa): sem isso
         // "DISABLED" na unica empresa da conta e' recusado (409 COMPANY_ACCESS_ALL_DISABLED, regra do security).
-        long ownerA = scalar("SELECT id FROM users WHERE email = '" + emailA + "'");
-        update("INSERT INTO user_companies (user_id, company_id) VALUES (" + ownerA + ", " + companyC + ")");
+        long ownerA = scalar("SELECT id FROM sg_users WHERE email = '" + emailA + "'");
+        update("INSERT INTO sg_user_companies (user_id, company_id) VALUES (" + ownerA + ", " + companyC + ")");
     }
 
     @AfterEach
@@ -116,7 +116,7 @@ class AuthAccessModeGuardianIT {
     @Test
     void usersEndpointWithMembershipsStaysClosedToTheClientAccount() {
         String tokenB = login(emailB);
-        String ownerB = text("SELECT public_id FROM users WHERE email = '" + emailB + "'");
+        String ownerB = text("SELECT public_id FROM sg_users WHERE email = '" + emailB + "'");
         given().header("Authorization", "Bearer " + tokenB).get("/users/" + ownerB).then().statusCode(403);
         // T5.15: a conta-cliente NAO administra empresas por /companies (so' a plataforma; @SgPlatformScope)
         given().header("Authorization", "Bearer " + tokenB).get("/companies").then().statusCode(403);

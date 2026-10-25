@@ -193,18 +193,18 @@ abstract class ProactiveAuthGuardianBase {
     }
 
     private void seedIntegrationRole(String db) throws Exception {
-        exec(db, "INSERT INTO permissions (name, description, public_id) VALUES ('PROBE_READ', 'probe', '"
+        exec(db, "INSERT INTO sg_permissions (name, description, public_id) VALUES ('PROBE_READ', 'probe', '"
                 + UUID.randomUUID() + "') ON CONFLICT DO NOTHING");
-        exec(db, "INSERT INTO roles (name, description, public_id, for_integration) VALUES ('" + ROLE
+        exec(db, "INSERT INTO sg_roles (name, description, public_id, for_integration) VALUES ('" + ROLE
                 + "', 'probe', '" + UUID.randomUUID() + "', TRUE) ON CONFLICT DO NOTHING");
-        exec(db, "INSERT INTO role_permissions (role_id, permission_id) SELECT r.id, p.id FROM roles r, permissions p "
+        exec(db, "INSERT INTO sg_role_permissions (role_id, permission_id) SELECT r.id, p.id FROM sg_roles r, sg_permissions p "
                 + "WHERE r.name = '" + ROLE + "' AND p.name = 'PROBE_READ' ON CONFLICT DO NOTHING");
     }
 
     private void grantToAdmin(String db, String permission) throws Exception {
-        exec(db, "INSERT INTO permissions (name, description, public_id) VALUES ('" + permission + "', 'probe', '"
+        exec(db, "INSERT INTO sg_permissions (name, description, public_id) VALUES ('" + permission + "', 'probe', '"
                 + UUID.randomUUID() + "') ON CONFLICT DO NOTHING");
-        exec(db, "INSERT INTO role_permissions (role_id, permission_id) SELECT r.id, p.id FROM roles r, permissions p "
+        exec(db, "INSERT INTO sg_role_permissions (role_id, permission_id) SELECT r.id, p.id FROM sg_roles r, sg_permissions p "
                 + "WHERE r.name = 'ADMIN' AND r.company_id IS NULL AND p.name = '" + permission + "' ON CONFLICT DO NOTHING");
     }
 

@@ -1,7 +1,7 @@
 -- Seed permissions for payment_plans endpoints
 
 -- Insert permissions for payment_plans
-INSERT INTO permissions (public_id, name, description) VALUES
+INSERT INTO sg_permissions (public_id, name, description) VALUES
     (gen_random_uuid()::text, 'PAYMENT_PLANS_READ', 'Visualizar planos de pagamento'),
     (gen_random_uuid()::text, 'PAYMENT_PLANS_CREATE', 'Criar planos de pagamento'),
     (gen_random_uuid()::text, 'PAYMENT_PLANS_UPDATE', 'Atualizar planos de pagamento'),
@@ -9,10 +9,10 @@ INSERT INTO permissions (public_id, name, description) VALUES
 ON CONFLICT (name) DO NOTHING;
 
 -- Link permissions to ADMIN role
-INSERT INTO role_permissions (role_id, permission_id)
+INSERT INTO sg_role_permissions (role_id, permission_id)
 SELECT r.id, p.id
-FROM roles r
-CROSS JOIN permissions p
+FROM sg_roles r
+CROSS JOIN sg_permissions p
 WHERE r.name = 'ADMIN'
   AND p.name IN ('PAYMENT_PLANS_READ', 'PAYMENT_PLANS_CREATE', 'PAYMENT_PLANS_UPDATE', 'PAYMENT_PLANS_DELETE')
 ON CONFLICT DO NOTHING;

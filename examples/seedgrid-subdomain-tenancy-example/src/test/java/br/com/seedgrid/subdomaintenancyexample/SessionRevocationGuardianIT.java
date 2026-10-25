@@ -174,7 +174,7 @@ class SessionRevocationGuardianIT {
         betaCompanyPublicId = given().header("Host", HOST_BETA).auth().oauth2(betaAdminToken).get("/me/companies")
                 .then().statusCode(200).extract().jsonPath().getString("[0].publicId");
         assertNotNull(betaCompanyPublicId, "o tenant beta precisa ter uma empresa");
-        betaAdminRolePublicId = query(betaDb, "SELECT public_id FROM roles WHERE name = 'ADMIN' AND company_id IS NULL");
+        betaAdminRolePublicId = query(betaDb, "SELECT public_id FROM sg_roles WHERE name = 'ADMIN' AND company_id IS NULL");
     }
 
     @Test

@@ -109,8 +109,8 @@ class AuthAccessModeAndMembershipsGuardianIT {
         betaDb = Utils.buildTenantDatabaseName("beta", productPrefix);
         provision("alfa", "11222333000181");
         provision("beta", "11444777000161");
-        alfaCompany = text(alfaDb, "SELECT public_id FROM companies ORDER BY id LIMIT 1");
-        betaCompany = text(betaDb, "SELECT public_id FROM companies ORDER BY id LIMIT 1");
+        alfaCompany = text(alfaDb, "SELECT public_id FROM sg_companies ORDER BY id LIMIT 1");
+        betaCompany = text(betaDb, "SELECT public_id FROM sg_companies ORDER BY id LIMIT 1");
     }
 
     @AfterEach
@@ -144,8 +144,8 @@ class AuthAccessModeAndMembershipsGuardianIT {
     @Test
     void userMembershipsComeFromTheTenantDatabaseOnly() throws Exception {
         String alfaToken = login(HOST_ALFA, "admin@alfa.test");
-        String alfaAdmin = text(alfaDb, "SELECT public_id FROM users WHERE email = 'admin@alfa.test'");
-        String betaAdmin = text(betaDb, "SELECT public_id FROM users WHERE email = 'admin@beta.test'");
+        String alfaAdmin = text(alfaDb, "SELECT public_id FROM sg_users WHERE email = 'admin@alfa.test'");
+        String betaAdmin = text(betaDb, "SELECT public_id FROM sg_users WHERE email = 'admin@beta.test'");
 
         given().header("Host", HOST_ALFA).auth().oauth2(alfaToken).get("/users/" + alfaAdmin)
                 .then().statusCode(200)

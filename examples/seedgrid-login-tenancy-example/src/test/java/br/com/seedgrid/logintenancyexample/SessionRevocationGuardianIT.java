@@ -208,7 +208,7 @@ class SessionRevocationGuardianIT {
         given().contentType(ContentType.JSON).body(Map.of("token", token)).post("/public/signup/confirm-email")
                 .then().statusCode(200);
         Object[] row = QuarkusTransaction.requiringNew().call(() -> (Object[]) em
-                .createNativeQuery("SELECT id, public_id FROM companies WHERE cpf_cnpj = :c").setParameter("c", cnpj)
+                .createNativeQuery("SELECT id, public_id FROM sg_companies WHERE cpf_cnpj = :c").setParameter("c", cnpj)
                 .getSingleResult());
         return new Company(((Number) row[0]).longValue(), (String) row[1], email);
     }

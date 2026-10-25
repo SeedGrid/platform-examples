@@ -165,18 +165,18 @@ class ApiKeyIsolationGuardianIT {
         String key = createKey(HOST_ALFA, alfaToken);
         probe("/probe/permission", HOST_ALFA, key).then().statusCode(200);
 
-        exec(alfaDb, "UPDATE roles SET for_integration = FALSE WHERE name = '" + ROLE + "'");
+        exec(alfaDb, "UPDATE sg_roles SET for_integration = FALSE WHERE name = '" + ROLE + "'");
         try {
             probe("/probe/permission", HOST_ALFA, key).then().statusCode(401);
         } finally {
-            exec(alfaDb, "UPDATE roles SET for_integration = TRUE WHERE name = '" + ROLE + "'");
+            exec(alfaDb, "UPDATE sg_roles SET for_integration = TRUE WHERE name = '" + ROLE + "'");
         }
 
-        exec(alfaDb, "UPDATE roles SET active = FALSE WHERE name = '" + ROLE + "'");
+        exec(alfaDb, "UPDATE sg_roles SET active = FALSE WHERE name = '" + ROLE + "'");
         try {
             probe("/probe/permission", HOST_ALFA, key).then().statusCode(401);
         } finally {
-            exec(alfaDb, "UPDATE roles SET active = TRUE WHERE name = '" + ROLE + "'");
+            exec(alfaDb, "UPDATE sg_roles SET active = TRUE WHERE name = '" + ROLE + "'");
         }
         probe("/probe/permission", HOST_ALFA, key).then().statusCode(200);
     }
@@ -185,11 +185,11 @@ class ApiKeyIsolationGuardianIT {
     void keyLosesPermissionImmediatelyWhenRolePermissionIsRemoved() throws Exception {
         String key = createKey(HOST_ALFA, alfaToken);
         probe("/probe/permission", HOST_ALFA, key).then().statusCode(200);
-        exec(alfaDb, "DELETE FROM role_permissions WHERE role_id = (SELECT id FROM roles WHERE name = '" + ROLE + "')");
+        exec(alfaDb, "DELETE FROM sg_role_permissions WHERE role_id = (SELECT id FROM sg_roles WHERE name = '" + ROLE + "')");
         try {
             probe("/probe/permission", HOST_ALFA, key).then().statusCode(403);
         } finally {
-            exec(alfaDb, "INSERT INTO role_permissions (role_id, permission_id) SELECT r.id, p.id FROM roles r, permissions p "
+            exec(alfaDb, "INSERT INTO sg_role_permissions (role_id, permission_id) SELECT r.id, p.id FROM sg_roles r, sg_permissions p "
                     + "WHERE r.name = '" + ROLE + "' AND p.name = 'PROBE_READ'");
         }
     }
@@ -294,18 +294,18 @@ class ApiKeyIsolationGuardianIT {
     }
 
     private void seedIntegrationRole(String db) throws Exception {
-        exec(db, "INSERT INTO permissions (name, description, public_id) VALUES ('PROBE_READ', 'probe', '"
+        exec(db, "INSERT INTO sg_permissions (name, description, public_id) VALUES ('PROBE_READ', 'probe', '"
                 + UUID.randomUUID() + "') ON CONFLICT DO NOTHING");
-        exec(db, "INSERT INTO roles (name, description, public_id, for_integration) VALUES ('" + ROLE
+        exec(db, "INSERT INTO sg_roles (name, description, public_id, for_integration) VALUES ('" + ROLE
                 + "', 'probe', '" + UUID.randomUUID() + "', TRUE) ON CONFLICT DO NOTHING");
-        exec(db, "INSERT INTO role_permissions (role_id, permission_id) SELECT r.id, p.id FROM roles r, permissions p "
+        exec(db, "INSERT INTO sg_role_permissions (role_id, permission_id) SELECT r.id, p.id FROM sg_roles r, sg_permissions p "
                 + "WHERE r.name = '" + ROLE + "' AND p.name = 'PROBE_READ' ON CONFLICT DO NOTHING");
     }
 
     private void grantToAdmin(String db, String permission) throws Exception {
-        exec(db, "INSERT INTO permissions (name, description, public_id) VALUES ('" + permission + "', 'probe', '"
+        exec(db, "INSERT INTO sg_permissions (name, description, public_id) VALUES ('" + permission + "', 'probe', '"
                 + UUID.randomUUID() + "') ON CONFLICT DO NOTHING");
-        exec(db, "INSERT INTO role_permissions (role_id, permission_id) SELECT r.id, p.id FROM roles r, permissions p "
+        exec(db, "INSERT INTO sg_role_permissions (role_id, permission_id) SELECT r.id, p.id FROM sg_roles r, sg_permissions p "
                 + "WHERE r.name = 'ADMIN' AND r.company_id IS NULL AND p.name = '" + permission + "' ON CONFLICT DO NOTHING");
     }
 
