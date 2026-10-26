@@ -86,7 +86,7 @@ mvn test -Dcities.test.jdbc-url=jdbc:postgresql://127.0.0.1:5432/cities_test   #
 
 ## Observações de configuração
 
-- **Hibernate no dev mode:** o exemplo define `quarkus.hibernate-orm.validate-in-dev-mode=false`. O Quarkus valida o schema numa thread logo após subir o Hibernate, e a cities migra no `StartupEvent` (depois), então num banco vazio o log mostraria dois `ERROR ... missing table [geo_cities]` apesar de a API responder.
+- **Hibernate no dev mode:** o exemplo define `quarkus.hibernate-orm.validate-in-dev-mode=false`. O Quarkus valida o schema numa thread logo após subir o Hibernate, e a cities migra no `StartupEvent` (depois), então num banco vazio o log mostraria dois `ERROR ... missing table [sg_cities]` apesar de a API responder.
 - **`quarkus.hibernate-orm.packages`** lista as entidades da cities, da security, do commons e da auditoria (com várias extensions contribuindo entidades a lista é explícita).
 - **Flyway do host:** só `security` e `audit`; a cities migra sozinha, com histórico `flyway_schema_history_cities`.
 - **Versões:** a `seedgrid-security` 2026.10.14 traz o commons compatível com a cities (a 2026.09.25 trazia um commons anterior e a subida falhava com `ClassNotFoundException: ...spis.ApiExceptionExtension`).
