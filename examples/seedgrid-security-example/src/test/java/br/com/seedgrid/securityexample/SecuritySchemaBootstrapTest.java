@@ -32,16 +32,16 @@ class SecuritySchemaBootstrapTest {
     void migrationsCreateMembershipSchemaAndBootstrapDefaultCompany() throws Exception {
         try (Connection conn = dataSource.getConnection()) {
             // Schema base + modelo aditivo de membership (V213/V214/V221)
-            assertTrue(tableExists(conn, "users"), "tabela users");
-            assertTrue(tableExists(conn, "roles"), "tabela roles");
-            assertTrue(tableExists(conn, "companies"), "tabela companies");
-            assertTrue(tableExists(conn, "user_companies"), "tabela user_companies");
-            assertTrue(tableExists(conn, "user_company_roles"), "tabela user_company_roles (V221)");
-            assertTrue(columnExists(conn, "user_companies", "is_root"), "user_companies.is_root (V221)");
+            assertTrue(tableExists(conn, "sg_users"), "tabela users");
+            assertTrue(tableExists(conn, "sg_roles"), "tabela roles");
+            assertTrue(tableExists(conn, "sg_companies"), "tabela companies");
+            assertTrue(tableExists(conn, "sg_user_companies"), "tabela user_companies");
+            assertTrue(tableExists(conn, "sg_user_company_roles"), "tabela user_company_roles (V221)");
+            assertTrue(columnExists(conn, "sg_user_companies", "is_root"), "user_companies.is_root (V221)");
 
             // Bootstrap do security: default company + primeiro admin criados no startup
-            assertTrue(count(conn, "companies") >= 1, "default company criada");
-            assertTrue(count(conn, "users") >= 1, "primeiro admin criado");
+            assertTrue(count(conn, "sg_companies") >= 1, "default company criada");
+            assertTrue(count(conn, "sg_users") >= 1, "primeiro admin criado");
         }
     }
 

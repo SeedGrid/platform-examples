@@ -18,10 +18,10 @@ próprios endpoints).
 | Plano, term (preço, vigência, vagas, permissões), trial, assinatura, ciclo | tudo | nada |
 | Checkout, portal, webhook, faturas, troca de plano | tudo | nada |
 | **Quais contadores de uso existem** | junta e valida | declara (`ReportUsageMeters`) |
-| **O que é 1 unidade e quando contar** | — | `@ConsumesUsage(meter = "reports")` |
+| **O que é 1 unidade e quando contar** | — | `@SgConsumesUsage(meter = "reports")` |
 | Franquia e preço do excedente de cada contador, por plano | guarda e cobra | só semeia a cota do trial |
 | Bloqueio 402 (sem assinatura, trial vencido, fora do plano, franquia esgotada) | tudo | nada |
-| Funcionalidade por plano | `@RequiresPlanFeature` | a permissão `REPORT_EXPORT` |
+| Funcionalidade por plano | `@SgRequiresPlanFeature` | a permissão `REPORT_EXPORT` |
 | Gateway | interfaces | `FakeBillingProvider` (só no exemplo) |
 
 O código do produto é pequeno de propósito:
@@ -55,7 +55,7 @@ public class ReportUsageMeters implements UsageMeterContributor {
 ```
 
 - O **código** (`[a-z0-9-]`, até 40 caracteres) é a identidade do contador **para sempre**: vai para o banco,
-  para o `@ConsumesUsage` e para o nome do meter no provider. Não reaproveite o código de um contador removido
+  para o `@SgConsumesUsage` e para o nome do meter no provider. Não reaproveite o código de um contador removido
   para outro significado, porque misturaria o histórico de cobrança dos dois.
 - O **label** é o que aparece nas telas e nas mensagens de erro.
 - Código inválido ou repetido derruba o startup.
@@ -66,7 +66,7 @@ Quando **uma chamada vale uma quantidade fixa**, anote o método:
 
 ```java
 @POST
-@ConsumesUsage(meter = ReportUsageMeters.REPORTS)        // units = 1 por padrão
+@SgConsumesUsage(meter = ReportUsageMeters.REPORTS)        // units = 1 por padrão
 public Map<String, Object> generate() { ... }
 ```
 

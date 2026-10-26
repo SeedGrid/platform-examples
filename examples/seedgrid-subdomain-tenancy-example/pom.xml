@@ -22,7 +22,7 @@
              direto e' mais raso e vence por mediacao, entao esquecer de subir um deles
              junto com este faz o host rodar com foundation mais velha do que a extensao
              espera — e o sintoma aparece longe da causa. -->
-        <seedgrid.subdomain-tenancy.version>2026.10.13</seedgrid.subdomain-tenancy.version>
+        <seedgrid.subdomain-tenancy.version>2026.10.22</seedgrid.subdomain-tenancy.version>
     </properties>
 
     <dependencyManagement>

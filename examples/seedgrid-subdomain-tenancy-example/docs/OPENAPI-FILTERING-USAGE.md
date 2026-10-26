@@ -10,27 +10,27 @@ Quando você acessa o Swagger UI, os endpoints são filtrados automaticamente:
 
 **Exibe:**
 - ✅ Endpoints públicos (sem anotação)
-- ✅ Endpoints `@MasterOnly`
+- ✅ Endpoints `@SgMasterOnly`
 
 **Oculta:**
-- ❌ Endpoints `@TenantOnly`
+- ❌ Endpoints `@SgTenantOnly`
 
 ### Acesso Tenant (`http://lckconsultoria.kb.seedgrid.com.br:8080/q/swagger-ui`)
 
 **Exibe:**
 - ✅ Endpoints públicos (sem anotação)
-- ✅ Endpoints `@TenantOnly`
+- ✅ Endpoints `@SgTenantOnly`
 
 **Oculta:**
-- ❌ Endpoints `@MasterOnly`
+- ❌ Endpoints `@SgMasterOnly`
 
 ## 📝 Exemplos Implementados
 
-### `@TenantOnly` - PersonResource
+### `@SgTenantOnly` - PersonResource
 
 ```java
 @Path("/api/persons")
-@TenantOnly
+@SgTenantOnly
 public class PersonResource {
     // Endpoints de gestão de pessoas
     // Só aparecem no Swagger do tenant
@@ -41,11 +41,11 @@ public class PersonResource {
 - ✅ Visível em: `http://lckconsultoria.kb.seedgrid.com.br:8080/q/swagger-ui`
 - ❌ Invisível em: `http://kb.seedgrid.com.br:8080/q/swagger-ui`
 
-### `@MasterOnly` - PaymentPlanResource
+### `@SgMasterOnly` - PaymentPlanResource
 
 ```java
 @Path("/api/payment-plans")
-@MasterOnly
+@SgMasterOnly
 public class PaymentPlanResource {
     // Endpoints de gestão de planos de pagamento
     // Só aparecem no Swagger master
@@ -95,11 +95,11 @@ http://kb.seedgrid.com.br:8080/q/swagger-ui
 ```
 
 **Você deve ver:**
-- Payment Plans (MASTER) - `@MasterOnly`
+- Payment Plans (MASTER) - `@SgMasterOnly`
 - Public endpoints (auth, tenants)
 
 **Você NÃO deve ver:**
-- Persons (TENANT) - `@TenantOnly`
+- Persons (TENANT) - `@SgTenantOnly`
 
 ### 3. Acesse o Swagger de um Tenant
 
@@ -127,18 +127,18 @@ http://teste.kb.seedgrid.com.br:8080/q/swagger-ui
 ```
 
 **Você deve ver:**
-- Persons (TENANT) - `@TenantOnly`
+- Persons (TENANT) - `@SgTenantOnly`
 - Public endpoints (auth, tenants)
 
 **Você NÃO deve ver:**
-- Payment Plans (MASTER) - `@MasterOnly`
+- Payment Plans (MASTER) - `@SgMasterOnly`
 
 ## 📊 Matriz de Visibilidade
 
 | Endpoint | Anotação | Swagger Master | Swagger Tenant |
 |----------|----------|----------------|----------------|
-| `/api/persons` | `@TenantOnly` | ❌ | ✅ |
-| `/api/payment-plans` | `@MasterOnly` | ✅ | ❌ |
+| `/api/persons` | `@SgTenantOnly` | ❌ | ✅ |
+| `/api/payment-plans` | `@SgMasterOnly` | ✅ | ❌ |
 | `/public/auth/login` | (nenhuma) | ✅ | ✅ |
 | `/public/tenants` | (nenhuma) | ✅ | ✅ |
 
@@ -158,7 +158,7 @@ Se você quiser segurança adicional além da filtragem do Swagger:
 
 ```java
 @Path("/admin/something")
-@MasterOnly  // Apenas documentação
+@SgMasterOnly  // Apenas documentação
 public class AdminResource {
 
     @Inject
@@ -177,17 +177,17 @@ public class AdminResource {
 
 ## 🔗 Documentação Completa
 
-Para mais detalhes sobre como usar as anotações `@TenantOnly` e `@MasterOnly`, consulte:
+Para mais detalhes sobre como usar as anotações `@SgTenantOnly` e `@SgMasterOnly`, consulte:
 
 - [OPENAPI-FILTERING.md](../../seedgrid-subdomain-tenancy/docs/OPENAPI-FILTERING.md) - Documentação completa na biblioteca
 - [TenantAwareOpenApiFilter.java](../src/main/java/br/com/seedgrid/subdomaintenancyexample/config/TenantAwareOpenApiFilter.java) - Implementação do filtro
-- [TenantOnly.java](../../seedgrid-subdomain-tenancy/src/main/java/br/com/seedgrid/multitenancy/annotations/TenantOnly.java) - Anotação para tenants
-- [MasterOnly.java](../../seedgrid-subdomain-tenancy/src/main/java/br/com/seedgrid/multitenancy/annotations/MasterOnly.java) - Anotação para master
+- [SgTenantOnly.java](../../seedgrid-subdomain-tenancy/src/main/java/br/com/seedgrid/multitenancy/annotations/SgTenantOnly.java) - Anotação para tenants
+- [SgMasterOnly.java](../../seedgrid-subdomain-tenancy/src/main/java/br/com/seedgrid/multitenancy/annotations/SgMasterOnly.java) - Anotação para master
 
 ## 🎓 Resumo
 
-1. Use `@TenantOnly` em endpoints que operam em dados do tenant
-2. Use `@MasterOnly` em endpoints administrativos globais
+1. Use `@SgTenantOnly` em endpoints que operam em dados do tenant
+2. Use `@SgMasterOnly` em endpoints administrativos globais
 3. Não use anotação em endpoints públicos
 4. Teste acessando ambos os Swaggers (master e tenant)
 5. Lembre-se: isso é apenas documentação, implemente segurança real nos endpoints sensíveis

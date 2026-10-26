@@ -98,7 +98,7 @@ Esta documentação descreve todas as bibliotecas SeedGrid utilizadas no projeto
 - Suporte a MongoDB ou JPA como storage
 - Captura de dados antes/depois da operação
 - Integração com contexto de tenant e usuário
-- Anotação `@Audit` para marcar métodos auditáveis
+- Anotação `@SgAudit` para marcar métodos auditáveis
 
 **Dependência Maven**:
 ```xml
@@ -452,7 +452,7 @@ seedgrid.audit.jpa.jdbc.url=jdbc:postgresql://localhost:5432/audit_db
 
 #### 1. EmailTemplateProvider
 
-**Interface**: `br.com.seedgrid.subdomaintenancy.spi.EmailTemplateProvider`
+**Interface**: `br.com.seedgrid.subdomaintenancy.spis.EmailTemplateProvider`
 
 **Propósito**: Customizar HTML e assunto do email de confirmação de tenant.
 
@@ -493,7 +493,7 @@ public class CustomEmailTemplateProvider implements EmailTemplateProvider {
 
 #### 2. PasswordEncoder
 
-**Interface**: `br.com.seedgrid.subdomaintenancy.spi.PasswordEncoder`
+**Interface**: `br.com.seedgrid.subdomaintenancy.spis.PasswordEncoder`
 
 **Propósito**: Codificar senhas de tenant.
 
@@ -521,7 +521,7 @@ public class ArgonPasswordEncoder implements PasswordEncoder {
 
 #### 3. TemplateMultitenancyProvider
 
-**Interface**: `br.com.seedgrid.subdomaintenancy.spi.TemplateMultitenancyProvider`
+**Interface**: `br.com.seedgrid.subdomaintenancy.spis.TemplateMultitenancyProvider`
 
 **Propósito**: Renderizar template de email de validação de tenant.
 
@@ -563,7 +563,7 @@ public class CustomTemplateMultitenancyProvider implements TemplateMultitenancyP
 
 #### 4. MultitenancyNotificationService
 
-**Interface**: `br.com.seedgrid.subdomaintenancy.spi.MultitenancyNotificationService`
+**Interface**: `br.com.seedgrid.subdomaintenancy.spis.MultitenancyNotificationService`
 
 **Propósito**: Enviar notificações de validação de tenant (email, SMS, WhatsApp, etc.).
 
@@ -612,7 +612,7 @@ public class SmsNotificationService implements MultitenancyNotificationService {
 
 #### 1. EmailServiceInterface
 
-**Interface**: `br.com.seedgrid.security.spi.EmailServiceInterface`
+**Interface**: `br.com.seedgrid.security.spis.EmailServiceInterface`
 
 **Propósito**: Customizar envio de emails de confirmação e recuperação de senha.
 
@@ -678,7 +678,7 @@ public class CustomEmailService implements EmailServiceInterface {
 
 #### 2. JwtTokenCustomizer
 
-**Interface**: `br.com.seedgrid.security.spi.JwtTokenCustomizer`
+**Interface**: `br.com.seedgrid.security.spis.JwtTokenCustomizer`
 
 **Propósito**: Adicionar claims customizados ao token JWT.
 
@@ -714,7 +714,7 @@ public class CustomJwtTokenCustomizer implements JwtTokenCustomizer {
 
 #### 3. JwtTokenValidator
 
-**Interface**: `br.com.seedgrid.security.spi.JwtTokenValidator`
+**Interface**: `br.com.seedgrid.security.spis.JwtTokenValidator`
 
 **Propósito**: Validar claims customizados do token JWT.
 
@@ -751,7 +751,7 @@ public class CustomJwtTokenValidator implements JwtTokenValidator {
 
 #### 4. TemplateSecurityProvider
 
-**Interface**: `br.com.seedgrid.security.spi.TemplateSecurityProvider`
+**Interface**: `br.com.seedgrid.security.spis.TemplateSecurityProvider`
 
 **Propósito**: Prover templates HTML para emails de segurança.
 
@@ -824,7 +824,7 @@ public class CustomTemplateSecurityProvider implements TemplateSecurityProvider 
 
 #### 5. TwoFactorStrategy
 
-**Interface**: `br.com.seedgrid.security.spi.TwoFactorStrategy`
+**Interface**: `br.com.seedgrid.security.spis.TwoFactorStrategy`
 
 **Propósito**: Implementar diferentes estratégias de 2FA (EMAIL, TOTP, SMS, etc.).
 
@@ -881,7 +881,7 @@ public class SmsTwoFactorStrategy implements TwoFactorStrategy {
 
 #### 6. TwoFactorEmailTemplateProvider
 
-**Interface**: `br.com.seedgrid.security.spi.TwoFactorEmailTemplateProvider`
+**Interface**: `br.com.seedgrid.security.spis.TwoFactorEmailTemplateProvider`
 
 **Propósito**: Customizar template de email para código 2FA.
 
@@ -927,7 +927,7 @@ public class CustomTwoFactorEmailTemplateProvider implements TwoFactorEmailTempl
 
 #### 7. UserAdditionalFieldsValidator
 
-**Interface**: `br.com.seedgrid.security.spi.UserAdditionalFieldsValidator`
+**Interface**: `br.com.seedgrid.security.spis.UserAdditionalFieldsValidator`
 
 **Propósito**: Validar os campos próprios da aplicação guardados em `User.additionalAttributes`
 (coluna `users.additional_attributes`, `jsonb`). Desde o security `2026.09.25` o `User` é concreto: não
@@ -959,7 +959,7 @@ public class DepartamentoObrigatorioValidator implements UserAdditionalFieldsVal
 
 #### 1. BackupExporter
 
-**Interface**: `br.com.seedgrid.backup.spi.BackupExporter`
+**Interface**: `br.com.seedgrid.backup.spis.BackupExporter`
 
 **Propósito**: Implementar diferentes formatos de exportação (CSV, SQL, Parquet, etc.).
 
@@ -1014,7 +1014,7 @@ public class SqlExporter implements BackupExporter {
 
 #### 2. ExportNotificationService
 
-**Interface**: `br.com.seedgrid.backup.spi.ExportNotificationService`
+**Interface**: `br.com.seedgrid.backup.spis.ExportNotificationService`
 
 **Propósito**: Notificar usuários quando o backup estiver pronto.
 
@@ -1063,7 +1063,7 @@ public class WebhookExportNotificationService implements ExportNotificationServi
 
 #### 3. TemplateBackupProvider
 
-**Interface**: `br.com.seedgrid.backup.spi.TemplateBackupProvider`
+**Interface**: `br.com.seedgrid.backup.spis.TemplateBackupProvider`
 
 **Propósito**: Prover template HTML para notificação de backup pronto.
 
@@ -1110,7 +1110,7 @@ public class CustomTemplateBackupProvider implements TemplateBackupProvider {
 
 #### 4. TenantProvider
 
-**Interface**: `br.com.seedgrid.backup.spi.TenantProvider`
+**Interface**: `br.com.seedgrid.backup.spis.TenantProvider`
 
 **Propósito**: Prover contexto de tenant para backup em ambientes multitenancy.
 
@@ -1412,16 +1412,16 @@ public class CustomBackupTemplateProvider implements TemplateBackupProvider {
 
 ### seedgrid-subdomain-tenancy
 
-#### @MasterOnly
+#### @SgMasterOnly
 
-**Localização**: `br.com.seedgrid.subdomaintenancy.annotations.MasterOnly`
+**Localização**: `br.com.seedgrid.subdomaintenancy.annotations.SgMasterOnly`
 
 **Propósito**: Marcar endpoints que devem aparecer apenas no OpenAPI/Swagger do domínio master.
 
 **Uso**:
 ```java
 @Path("/api/tenants")
-@MasterOnly
+@SgMasterOnly
 public class TenantResource {
 
     @GET
@@ -1440,7 +1440,7 @@ public class UserResource {
 
     @GET
     @Path("/admin/stats")
-    @MasterOnly
+    @SgMasterOnly
     public UserStats getAdminStats() {
         // Só aparece no master
         return statsService.getGlobalStats();
@@ -1456,16 +1456,16 @@ public class UserResource {
 
 ---
 
-#### @TenantOnly
+#### @SgTenantOnly
 
-**Localização**: `br.com.seedgrid.subdomaintenancy.annotations.TenantOnly`
+**Localização**: `br.com.seedgrid.subdomaintenancy.annotations.SgTenantOnly`
 
 **Propósito**: Marcar endpoints que devem aparecer apenas no OpenAPI/Swagger de tenants.
 
 **Uso**:
 ```java
 @Path("/api/invoices")
-@TenantOnly
+@SgTenantOnly
 public class InvoiceResource {
 
     @GET
@@ -1477,14 +1477,14 @@ public class InvoiceResource {
 }
 ```
 
-**Combinando com @MasterOnly**:
+**Combinando com @SgMasterOnly**:
 ```java
 @Path("/api/reports")
 public class ReportResource {
 
     @GET
     @Path("/tenant-sales")
-    @TenantOnly
+    @SgTenantOnly
     public SalesReport getTenantSales() {
         // Só no tenant
         return reportService.getTenantSales();
@@ -1492,7 +1492,7 @@ public class ReportResource {
 
     @GET
     @Path("/global-sales")
-    @MasterOnly
+    @SgMasterOnly
     public SalesReport getGlobalSales() {
         // Só no master
         return reportService.getGlobalSales();
@@ -1511,9 +1511,9 @@ public class ReportResource {
 
 ### seedgrid-audit
 
-#### @Audit
+#### @SgAudit
 
-**Localização**: `br.com.seedgrid.audit.annotations.Audit`
+**Localização**: `br.com.seedgrid.audit.annotations.SgAudit`
 
 **Propósito**: Marcar métodos ou classes para auditoria automática.
 
@@ -1525,7 +1525,7 @@ public class ReportResource {
 **Uso em classe**:
 ```java
 @ApplicationScoped
-@Audit(operation = AuditOperationEnum.OTHER)
+@SgAudit(operation = AuditOperationEnum.OTHER)
 public class ProductService {
 
     public void createProduct(Product product) {
@@ -1540,17 +1540,17 @@ public class ProductService {
 @ApplicationScoped
 public class ProductService {
 
-    @Audit(operation = AuditOperationEnum.CREATE, entity = "Product", description = "Criação de novo produto")
+    @SgAudit(operation = AuditOperationEnum.CREATE, entity = "Product", description = "Criação de novo produto")
     public void createProduct(Product product) {
         productRepository.persist(product);
     }
 
-    @Audit(operation = AuditOperationEnum.UPDATE, entity = "Product")
+    @SgAudit(operation = AuditOperationEnum.UPDATE, entity = "Product")
     public void updateProduct(Product product) {
         productRepository.merge(product);
     }
 
-    @Audit(operation = AuditOperationEnum.DELETE, entity = "Product")
+    @SgAudit(operation = AuditOperationEnum.DELETE, entity = "Product")
     public void deleteProduct(Long id) {
         productRepository.deleteById(id);
     }
@@ -1936,7 +1936,7 @@ CREATE TABLE customers (
 ```java
 package com.meuapp.resource.master;
 
-import br.com.seedgrid.subdomaintenancy.annotations.MasterOnly;
+import br.com.seedgrid.subdomaintenancy.annotations.SgMasterOnly;
 import com.meuapp.entity.master.PaymentPlan;
 import com.meuapp.repository.master.PaymentPlanRepository;
 import jakarta.inject.Inject;
@@ -1945,7 +1945,7 @@ import jakarta.ws.rs.core.MediaType;
 import java.util.List;
 
 @Path("/api/payment-plans")
-@MasterOnly  // ← Aparece só no Swagger do master
+@SgMasterOnly  // ← Aparece só no Swagger do master
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class PaymentPlanResource {
@@ -1979,7 +1979,7 @@ public class PaymentPlanResource {
 ```java
 package com.meuapp.resource.tenant;
 
-import br.com.seedgrid.subdomaintenancy.annotations.TenantOnly;
+import br.com.seedgrid.subdomaintenancy.annotations.SgTenantOnly;
 import com.meuapp.entity.tenant.Product;
 import com.meuapp.repository.tenant.ProductRepository;
 import jakarta.inject.Inject;
@@ -1988,7 +1988,7 @@ import jakarta.ws.rs.core.MediaType;
 import java.util.List;
 
 @Path("/api/products")
-@TenantOnly  // ← Aparece só no Swagger dos tenants
+@SgTenantOnly  // ← Aparece só no Swagger dos tenants
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class ProductResource {
@@ -2186,9 +2186,9 @@ docker-compose up -d postgres mongodb
 |----------|----------|--------------|-----------|
 | Repositório Master | `@PersistenceUnit("master")` | ✅ SIM | Usa datasource master |
 | Repositório Tenant | Nenhuma | ✅ NÃO usar | Usa datasource padrão (tenant) |
-| Resource Master | `@MasterOnly` | ❌ Opcional | Para OpenAPI/Swagger |
-| Resource Tenant | `@TenantOnly` | ❌ Opcional | Para OpenAPI/Swagger |
-| Método Auditável | `@Audit(...)` | ❌ Opcional | Para auditoria automática |
+| Resource Master | `@SgMasterOnly` | ❌ Opcional | Para OpenAPI/Swagger |
+| Resource Tenant | `@SgTenantOnly` | ❌ Opcional | Para OpenAPI/Swagger |
+| Método Auditável | `@SgAudit(...)` | ❌ Opcional | Para auditoria automática |
 
 ---
 

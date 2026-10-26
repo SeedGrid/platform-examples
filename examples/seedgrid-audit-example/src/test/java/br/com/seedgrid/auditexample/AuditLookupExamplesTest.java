@@ -119,7 +119,7 @@ class AuditLookupExamplesTest {
     private String findLatestBeforeState(String entity, String operation) throws SQLException {
         String sql = """
                 select before_state
-                from audit_log
+                from sg_audit_log
                 where entity = ? and operation = ?
                 order by id desc
                 limit 1

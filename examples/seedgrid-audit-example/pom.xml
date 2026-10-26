@@ -83,12 +83,12 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- audit-core: a API que o codigo usa diretamente (@Audit, AuditOperationEnum).
+        <!-- audit-core: a API que o codigo usa diretamente (@SgAudit, AuditOperationEnum).
              Declarado explicitamente por boa pratica (nao depender do transitivo do provider). -->
         <dependency>
             <groupId>br.com.seedgrid</groupId>
             <artifactId>seedgrid-audit-core</artifactId>
-            <version>2026.07.08</version>
+            <version>2026.10.22</version>
         </dependency>
         <!-- audit-postgresql: o provider (backend de persistencia), em scope RUNTIME.
              O host conhece so o core (abstracao); o provider e' detalhe de runtime que
@@ -97,7 +97,7 @@
         <dependency>
             <groupId>br.com.seedgrid</groupId>
             <artifactId>seedgrid-audit-postgresql</artifactId>
-            <version>2026.07.08</version>
+            <version>2026.10.22</version>
             <scope>runtime</scope>
         </dependency>
     </dependencies>

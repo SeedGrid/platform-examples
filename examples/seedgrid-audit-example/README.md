@@ -37,8 +37,8 @@ Ou seja: você consegue rastrear o que aconteceu sem vazar informação demais.
 O audit está distribuído em 3 pontos principais:
 
 1. Configuração da estratégia de persistência no `application.properties`
-2. Marcação das operações no controller com `@Audit`
-3. Marcação da entidade e dos campos sensíveis com `@Audit`, `@MaskRule` e `@PersonalData`
+2. Marcação das operações no controller com `@SgAudit`
+3. Marcação da entidade e dos campos sensíveis com `@SgAudit`, `@SgMaskRule` e `@SgPersonalData`
 
 ### 2.1 Estratégia de persistência
 
@@ -60,13 +60,13 @@ As opções mostradas no projeto são:
 
 ### 2.2 Auditoria das operações da API
 
-No arquivo [CustomerController.java](C:/empreendedorismo/seedgrid/seedgrid-audit-example/src/main/java/br/com/seedgrid/auditexample/controllers/CustomerController.java:1), cada endpoint recebe a anotação `@Audit`.
+No arquivo [CustomerController.java](C:/empreendedorismo/seedgrid/seedgrid-audit-example/src/main/java/br/com/seedgrid/auditexample/controllers/CustomerController.java:1), cada endpoint recebe a anotação `@SgAudit`.
 
 Exemplo:
 
 ```java
 @POST
-@Audit(operation = AuditOperationEnum.CREATE, entityFqcn = CUSTOMER_FQCN, description = "Create customer")
+@SgAudit(operation = AuditOperationEnum.CREATE, entityFqcn = CUSTOMER_FQCN, description = "Create customer")
 public Customer create(Customer customer) {
     return customerService.create(customer);
 }
@@ -89,12 +89,12 @@ O mesmo foi feito para:
 
 ### 2.3 Auditoria da entidade
 
-No arquivo [Customer.java](C:/empreendedorismo/seedgrid/seedgrid-audit-example/src/main/java/br/com/seedgrid/auditexample/entities/Customer.java:1), a própria entidade também está anotada com `@Audit`.
+No arquivo [Customer.java](C:/empreendedorismo/seedgrid/seedgrid-audit-example/src/main/java/br/com/seedgrid/auditexample/entities/Customer.java:1), a própria entidade também está anotada com `@SgAudit`.
 
 Exemplo simplificado:
 
 ```java
-@Audit(
+@SgAudit(
     entityFqcn = "br.com.seedgrid.auditexample.entities.Customer",
     description = "Customer entity audit",
     options = {
@@ -113,7 +113,7 @@ Aqui você está dizendo ao módulo:
 
 Esta é a parte mais importante.
 
-### 3.1 `@Audit` no controller
+### 3.1 `@SgAudit` no controller
 
 Use no endpoint quando você quiser registrar a ação executada pelo usuário.
 
@@ -165,7 +165,7 @@ Exemplos do projeto:
 
 Isso facilita muito a leitura posterior dos eventos.
 
-### 3.5 `@Audit` na entidade
+### 3.5 `@SgAudit` na entidade
 
 Quando usada na entidade, essa anotação ajuda a concentrar as regras de auditoria daquele objeto de negócio.
 
@@ -174,16 +174,16 @@ Pense assim:
 - no controller você diz "audite esta ação"
 - na entidade você diz "e quando auditar essa entidade, trate os campos deste jeito"
 
-### 3.6 `@MaskRule`
+### 3.6 `@SgMaskRule`
 
-É uma regra declarada no bloco `options` da anotação `@Audit` da entidade.
+É uma regra declarada no bloco `options` da anotação `@SgAudit` da entidade.
 
 Ela serve para definir como cada campo deve ser tratado na auditoria.
 
 Exemplo:
 
 ```java
-@MaskRule(field = "cpf", type = MaskingStrategy.FORMAT, maskWith = "***.***.***-**")
+@SgMaskRule(field = "cpf", type = MaskingStrategy.FORMAT, maskWith = "***.***.***-**")
 ```
 
 Em linguagem simples:
@@ -192,14 +192,14 @@ Em linguagem simples:
 - o tipo da proteção é `FORMAT`
 - o valor registrado no audit deve seguir a máscara `***.***.***-**`
 
-### 3.7 `@PersonalData`
+### 3.7 `@SgPersonalData`
 
 É a anotação colocada diretamente no atributo da entidade.
 
 Exemplo:
 
 ```java
-@PersonalData(type = MaskingStrategy.HASH)
+@SgPersonalData(type = MaskingStrategy.HASH)
 public LocalDate birthDate;
 ```
 
@@ -257,7 +257,7 @@ Preserva apenas uma pequena parte do dado.
 No projeto:
 
 ```java
-@PersonalData(type = MaskingStrategy.PARTIAL, maskWith = "3")
+@SgPersonalData(type = MaskingStrategy.PARTIAL, maskWith = "3")
 ```
 
 Isso indica que apenas uma parte do conteúdo deve continuar visível, conforme a regra implementada pelo módulo.
@@ -310,7 +310,7 @@ Resumo prático da entidade [Customer.java](C:/empreendedorismo/seedgrid/seedgri
 
 Observação importante:
 
-O projeto mostra regras tanto no nível do campo (`@PersonalData`) quanto no nível da entidade (`@MaskRule`). Isso é ótimo para demonstração, porque deixa claro que o módulo suporta mais de uma forma de declarar a proteção. Em projeto real, vale manter um padrão de equipe para não gerar dúvida.
+O projeto mostra regras tanto no nível do campo (`@SgPersonalData`) quanto no nível da entidade (`@SgMaskRule`). Isso é ótimo para demonstração, porque deixa claro que o módulo suporta mais de uma forma de declarar a proteção. Em projeto real, vale manter um padrão de equipe para não gerar dúvida.
 
 ## 6. Estrutura da tabela de negócio
 
@@ -520,7 +520,7 @@ Se você quiser repetir esse padrão em outra entidade, siga esta receita:
 
 ```java
 @Entity
-@Audit(
+@SgAudit(
     entityFqcn = "com.suaempresa.suaapp.entities.SuaEntidade",
     description = "Audit da entidade SuaEntidade"
 )
@@ -531,14 +531,14 @@ public class SuaEntidade {
 ### 10.2 Marque os campos sensíveis
 
 ```java
-@PersonalData(type = MaskingStrategy.HASH)
+@SgPersonalData(type = MaskingStrategy.HASH)
 public String documento;
 ```
 
 ou:
 
 ```java
-@PersonalData(type = MaskingStrategy.REMOVE)
+@SgPersonalData(type = MaskingStrategy.REMOVE)
 public String observacaoInterna;
 ```
 
@@ -546,7 +546,7 @@ public String observacaoInterna;
 
 ```java
 @POST
-@Audit(operation = AuditOperationEnum.CREATE, entityFqcn = "com.suaempresa.suaapp.entities.SuaEntidade", description = "Create entity")
+@SgAudit(operation = AuditOperationEnum.CREATE, entityFqcn = "com.suaempresa.suaapp.entities.SuaEntidade", description = "Create entity")
 public SuaEntidade create(SuaEntidade input) {
     ...
 }
@@ -589,9 +589,9 @@ Se você auditar tudo “cru”, você cria um histórico perigoso.
 
 ### 11.3 Mantenha consistência
 
-Se a equipe escolher usar regras no campo com `@PersonalData`, mantenha isso como padrão.
+Se a equipe escolher usar regras no campo com `@SgPersonalData`, mantenha isso como padrão.
 
-Se preferir centralizar no `@Audit(options = {...})`, mantenha isso como convenção.
+Se preferir centralizar no `@SgAudit(options = {...})`, mantenha isso como convenção.
 
 Misturar abordagens é bom para exemplo, mas em projeto real pode confundir.
 

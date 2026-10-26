@@ -132,7 +132,7 @@ CREATE DATABASE kb_tenant_lckconsultoria;
 ```sql
 -- Banco: kb_seedgrid_master
 -- Tabela: tenants
-INSERT INTO tenants (subdomain, ...) VALUES ('lckconsultoria', ...);
+INSERT INTO sg_tenants (subdomain, ...) VALUES ('lckconsultoria', ...);
 ```
 
 ## 📊 Matriz de Nomenclatura

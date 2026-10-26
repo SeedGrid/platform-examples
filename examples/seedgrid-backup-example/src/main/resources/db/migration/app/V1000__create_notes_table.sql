@@ -13,16 +13,16 @@ CREATE TABLE notes (
 -- =========================
 -- PERMISSIONS do dominio do exemplo
 -- =========================
-INSERT INTO permissions (name, description, public_id) VALUES
+INSERT INTO sg_permissions (name, description, public_id) VALUES
     ('NOTE_READ', 'Ler anotacoes', gen_random_uuid()::text),
     ('NOTE_CREATE', 'Criar anotacoes', gen_random_uuid()::text)
 ON CONFLICT (name) DO NOTHING;
 
 -- ADMIN (humano, bootstrap do seedgrid-security) recebe as duas
-INSERT INTO role_permissions (role_id, permission_id)
+INSERT INTO sg_role_permissions (role_id, permission_id)
 SELECT r.id, p.id
-FROM roles r
-CROSS JOIN permissions p
+FROM sg_roles r
+CROSS JOIN sg_permissions p
 WHERE r.name = 'ADMIN'
   AND p.name IN ('NOTE_READ', 'NOTE_CREATE')
 ON CONFLICT DO NOTHING;

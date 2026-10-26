@@ -2519,7 +2519,7 @@ Usuário pode fazer login com a nova senha ✓
 
 **Endpoint:** `PUT /users/change-password` *(requer JWT)*
 
-Este endpoint é anotado com `@PermitWithoutPasswordChange` — ou seja, funciona mesmo quando `changePasswordRequired = true`, que é exatamente quando é mais necessário.
+Este endpoint é anotado com `@SgPermitWithoutPasswordChange` — ou seja, funciona mesmo quando `changePasswordRequired = true`, que é exatamente quando é mais necessário.
 
 ```json
 {
@@ -3001,7 +3001,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import br.com.seedgrid.security.entities.User;
 import br.com.seedgrid.security.exceptions.InvalidUserAdditionalAttributesException;
-import br.com.seedgrid.security.spi.UserAdditionalFieldsValidator;
+import br.com.seedgrid.security.spis.UserAdditionalFieldsValidator;
 import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped

@@ -1,7 +1,7 @@
 # seedgrid-resilience-example
 
 App de exemplo, rodável, do `seedgrid-resilience-core`: **rate limiting** e **circuit breaker**
-declarativos via `@SeedGridRateLimit` e `@SeedGridCircuitBreaker`, sem depender de nenhuma outra
+declarativos via `@SgRateLimit` e `@SgCircuitBreaker`, sem depender de nenhuma outra
 extensão SeedGrid (não precisa de `seedgrid-security`, Postgres ou Redis).
 
 ## O princípio central: proteção declarativa, sem espalhar lógica pelo endpoint
@@ -30,7 +30,7 @@ adicione `seedgrid-cache-redis` (ou `-valkey`/`-dragonfly`) ao classpath e confi
 ### Rate limit — janela fixa (`/api/greeting`)
 
 ```java
-@SeedGridRateLimit(configKey = "greeting", permits = 3, window = 10, windowUnit = ChronoUnit.SECONDS)
+@SgRateLimit(configKey = "greeting", permits = 3, window = 10, windowUnit = ChronoUnit.SECONDS)
 public Response greeting() { ... }
 ```
 
@@ -41,7 +41,7 @@ sem recompilar (ver comentários no arquivo).
 ### Rate limit — token bucket (`/api/checkout`)
 
 ```java
-@SeedGridRateLimit(configKey = "checkout", permits = 2, window = 1, windowUnit = ChronoUnit.MINUTES,
+@SgRateLimit(configKey = "checkout", permits = 2, window = 1, windowUnit = ChronoUnit.MINUTES,
         algorithm = RateLimitAlgorithm.TOKEN_BUCKET, burstCapacity = 5)
 public Response checkout() { ... }
 ```
@@ -56,7 +56,7 @@ de só 2/min. A 6ª é negada até o balde repor pelo menos 1 token.
 serviço de verdade pra testar o circuito:
 
 ```java
-@SeedGridCircuitBreaker(
+@SgCircuitBreaker(
         name = "catalog-api",
         slidingWindowSize = 4,
         minimumNumberOfCalls = 4,
@@ -140,7 +140,7 @@ por teste (sem interferência) e `CircuitBreakerTest` faz o ciclo de vida inteir
   `X-RateLimit-*`) foi removido: o contrato do 429 agora é estável — sem body, com
   `X-RateLimit-Limit/Remaining/Reset` + `Retry-After` (`http.RateLimitExceptionMapper`), e este
   exemplo o asserta por completo no `RateLimitTest`.
-- `@SeedGridRateLimit`/`@SeedGridCircuitBreaker` são `@InterceptorBinding` de CDI — funcionam
+- `@SgRateLimit`/`@SgCircuitBreaker` são `@InterceptorBinding` de CDI — funcionam
   direto em métodos de recurso JAX-RS (que já são beans gerenciados), sem precisar de service
   intermediário. Só cuidado com **self-invocation**: chamar o método anotado de dentro da mesma
   classe (sem passar pelo proxy do CDI) não aciona o interceptor.

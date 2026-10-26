@@ -66,7 +66,7 @@ public class CustomerService {
 
     /**
      * Devolve uma copia da resposta com a PII mascarada conforme as anotacoes {@link
-     * br.com.seedgrid.privacy.masking.PersonalData} do {@link CustomerResponse}. O objeto original
+     * br.com.seedgrid.privacy.masking.SgPersonalData} do {@link CustomerResponse}. O objeto original
      * (e a entidade do banco) nao e' alterado.
      */
     public CustomerResponse mask(CustomerResponse response) {

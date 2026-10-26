@@ -3,7 +3,7 @@ package br.com.seedgrid.resilienceexample.service;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import br.com.seedgrid.resilience.core.runtime.circuitbreaker.annotations.SeedGridCircuitBreaker;
+import br.com.seedgrid.resilience.core.runtime.circuitbreaker.annotations.SgCircuitBreaker;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.extern.slf4j.Slf4j;
 
@@ -32,7 +32,7 @@ public class CatalogService {
         return realCalls.get();
     }
 
-    @SeedGridCircuitBreaker(
+    @SgCircuitBreaker(
             name = "catalog-api",
             slidingWindowSize = 4,
             minimumNumberOfCalls = 4,

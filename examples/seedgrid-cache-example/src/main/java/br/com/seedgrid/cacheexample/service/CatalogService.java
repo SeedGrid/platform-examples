@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
 
-import br.com.seedgrid.cache.core.commons.spi.SeedGridCacheProvider;
+import br.com.seedgrid.cache.core.commons.spis.SeedGridCacheProvider;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 

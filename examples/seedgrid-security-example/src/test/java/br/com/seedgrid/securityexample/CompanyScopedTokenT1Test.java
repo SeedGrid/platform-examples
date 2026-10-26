@@ -122,13 +122,13 @@ class CompanyScopedTokenT1Test {
     }
 
     private Company companyByCnpj(String cnpj) {
-        return (Company) em.createQuery("SELECT c FROM Company c WHERE c.cnpj = :c")
+        return (Company) em.createQuery("SELECT c FROM Company c WHERE c.cpfCnpj = :c")
                 .setParameter("c", cnpj).getSingleResult();
     }
 
     private Company company(String cnpj, String name) {
         Company c = new Company();
-        c.setCnpj(cnpj);
+        c.setCpfCnpj(cnpj);
         c.setCorporateName(name);
         c.setTradeName(name);
         return c;

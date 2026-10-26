@@ -31,16 +31,16 @@ class BillingSchemaBootstrapTest {
     void billingCriaAsTabelasEOProdutoSoAcrescentaOCampoDele() throws Exception {
         try (Connection conn = dataSource.getConnection()) {
             assertAll(
-                    () -> assertTrue(tableExists(conn, "users"), "users (security)"),
-                    () -> assertTrue(tableExists(conn, "plans"), "plans (billing)"),
-                    () -> assertTrue(tableExists(conn, "plan_terms"), "plan_terms (billing)"),
-                    () -> assertTrue(tableExists(conn, "tenant_subscriptions"), "assinaturas (billing)"),
-                    () -> assertTrue(tableExists(conn, "subscription_billing_cycles"), "ciclos (billing)"),
-                    () -> assertTrue(tableExists(conn, "billing_account_history"), "historico (billing)"),
+                    () -> assertTrue(tableExists(conn, "sg_users"), "users (security)"),
+                    () -> assertTrue(tableExists(conn, "sg_plans"), "plans (billing)"),
+                    () -> assertTrue(tableExists(conn, "sg_plan_terms"), "plan_terms (billing)"),
+                    () -> assertTrue(tableExists(conn, "sg_tenant_subscriptions"), "assinaturas (billing)"),
+                    () -> assertTrue(tableExists(conn, "sg_subscription_billing_cycles"), "ciclos (billing)"),
+                    () -> assertTrue(tableExists(conn, "sg_billing_account_history"), "historico (billing)"),
                     () -> assertTrue(adminHas(conn, "PLAN_CREATE"), "ADMIN com PLAN_CREATE (billing/V510)"),
                     () -> assertTrue(adminHas(conn, "REPORT_EXPORT"), "ADMIN com REPORT_EXPORT (app/V1000)"),
-                    () -> assertEquals("3", value(conn, "select m.included_units::text from plan_term_meters m "
-                            + "join plan_terms t on t.id = m.plan_term_id "
+                    () -> assertEquals("3", value(conn, "select m.included_units::text from sg_plan_term_meters m "
+                            + "join sg_plan_terms t on t.id = m.plan_term_id "
                             + "where t.public_id = '00000000-0000-0000-0000-0000000000a2' and m.meter = 'reports'"),
                             "cota do trial no contador reports (app/V1000)"));
         }
@@ -53,8 +53,8 @@ class BillingSchemaBootstrapTest {
     }
 
     private static boolean adminHas(Connection conn, String permission) throws Exception {
-        return value(conn, "select p.name from roles r join role_permissions rp on rp.role_id = r.id "
-                + "join permissions p on p.id = rp.permission_id where r.name = 'ADMIN' and p.name = '"
+        return value(conn, "select p.name from sg_roles r join sg_role_permissions rp on rp.role_id = r.id "
+                + "join sg_permissions p on p.id = rp.permission_id where r.name = 'ADMIN' and p.name = '"
                 + permission + "'") != null;
     }
 

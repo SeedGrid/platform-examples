@@ -8,8 +8,8 @@ import br.com.seedgrid.filemanagement.domains.FileMetadata;
 import br.com.seedgrid.filemanagement.domains.StorageKey;
 import br.com.seedgrid.filemanagement.domains.StorageOptions;
 import br.com.seedgrid.filemanagement.services.FileStorageRegistry;
-import br.com.seedgrid.filemanagement.spi.FileStorage;
-import br.com.seedgrid.filemanagement.spi.StorageException;
+import br.com.seedgrid.filemanagement.spis.FileStorage;
+import br.com.seedgrid.filemanagement.spis.StorageException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 

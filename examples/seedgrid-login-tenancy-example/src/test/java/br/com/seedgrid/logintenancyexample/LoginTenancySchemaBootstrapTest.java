@@ -28,9 +28,9 @@ class LoginTenancySchemaBootstrapTest {
     @Test
     void migrationsCreateBaselineAndAppSchema() throws Exception {
         try (Connection conn = dataSource.getConnection()) {
-            assertTrue(tableExists(conn, "users"), "tabela users (security)");
-            assertTrue(tableExists(conn, "companies"), "tabela companies (security)");
-            assertTrue(tableExists(conn, "signup_request"), "tabela signup_request (login-tenancy)");
+            assertTrue(tableExists(conn, "sg_users"), "tabela users (security)");
+            assertTrue(tableExists(conn, "sg_companies"), "tabela companies (security)");
+            assertTrue(tableExists(conn, "sg_signup_request"), "tabela signup_request (login-tenancy)");
             assertTrue(tableExists(conn, "products"), "tabela products (app host)");
             assertTrue(
                     tableExists(conn, "flyway_schema_history_login_tenancy"),

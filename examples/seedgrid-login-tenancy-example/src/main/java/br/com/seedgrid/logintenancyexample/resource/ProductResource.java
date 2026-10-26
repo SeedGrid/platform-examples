@@ -26,7 +26,7 @@ import jakarta.ws.rs.core.Response;
 /**
  * Endpoint de exemplo para o modelo login-tenancy: uma unica aplicacao/base,
  * onde cada company autenticada so enxerga seus proprios registros (isolamento
- * logico via CompanyRequestContext, nao ha @TenantOnly/@MasterOnly aqui).
+ * logico via CompanyRequestContext, nao ha @SgTenantOnly/@SgMasterOnly aqui).
  */
 @Path("/api/products")
 @Produces(MediaType.APPLICATION_JSON)

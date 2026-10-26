@@ -6,7 +6,7 @@ import java.util.Map;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
-import br.com.seedgrid.resilience.core.runtime.ratelimiter.annotations.SeedGridRateLimit;
+import br.com.seedgrid.resilience.core.runtime.ratelimiter.annotations.SgRateLimit;
 import br.com.seedgrid.resilience.core.runtime.ratelimiter.enums.RateLimitAlgorithm;
 import br.com.seedgrid.resilienceexample.service.CatalogService;
 import jakarta.inject.Inject;
@@ -33,7 +33,7 @@ public class ExampleResource {
     @GET
     @Path("/greeting")
     @Operation(summary = "Janela fixa: 3 chamadas / 10s por IP - a 4a recebe 429")
-    @SeedGridRateLimit(
+    @SgRateLimit(
             configKey = "greeting",
             permits = 3,
             window = 10,
@@ -46,7 +46,7 @@ public class ExampleResource {
     @GET
     @Path("/checkout")
     @Operation(summary = "Token bucket: 2 permits/min com rajada de ate 5 - permite bursts curtos")
-    @SeedGridRateLimit(
+    @SgRateLimit(
             configKey = "checkout",
             permits = 2,
             window = 1,
@@ -54,6 +54,33 @@ public class ExampleResource {
             algorithm = RateLimitAlgorithm.TOKEN_BUCKET,
             burstCapacity = 5)
     public Response checkout() {
+        return Response.ok(Map.of("status", "ok")).build();
+    }
+
+    @GET
+    @Path("/burst-window")
+    @Operation(summary = "Janela fixa de 20 chamadas / 60s: usado pelo teste de concorrencia")
+    @SgRateLimit(
+            configKey = "burst-window",
+            permits = 20,
+            window = 60,
+            windowUnit = ChronoUnit.SECONDS,
+            algorithm = RateLimitAlgorithm.FIXED_WINDOW)
+    public Response burstWindow() {
+        return Response.ok(Map.of("status", "ok")).build();
+    }
+
+    @GET
+    @Path("/burst-bucket")
+    @Operation(summary = "Token bucket com rajada de 10: usado pelo teste de concorrencia")
+    @SgRateLimit(
+            configKey = "burst-bucket",
+            permits = 1,
+            window = 1,
+            windowUnit = ChronoUnit.MINUTES,
+            algorithm = RateLimitAlgorithm.TOKEN_BUCKET,
+            burstCapacity = 10)
+    public Response burstBucket() {
         return Response.ok(Map.of("status", "ok")).build();
     }
 

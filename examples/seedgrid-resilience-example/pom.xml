@@ -61,7 +61,7 @@
         <dependency>
             <groupId>br.com.seedgrid</groupId>
             <artifactId>seedgrid-resilience-core</artifactId>
-            <version>2026.07.08</version>
+            <version>2026.10.22</version>
         </dependency>
 
         <dependency>

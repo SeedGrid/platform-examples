@@ -78,7 +78,7 @@ link do e-mail "Bem-vindo! Confirme seu e-mail" e pronto.
 |---|---|---|
 | **seedgrid-security** | Usuários, empresas, JWT, RBAC com permissões por papel, 2FA (TOTP e e-mail), política de senha, auto-cadastro com aprovação | [`seedgrid-security-example`](examples/seedgrid-security-example) ✅ |
 | **seedgrid-privacy** | Criptografia de dados pessoais em repouso e mascaramento em logs e auditoria | [`seedgrid-privacy-example`](examples/seedgrid-privacy-example) |
-| **seedgrid-audit** | Trilha de auditoria por anotação `@Audit`, com backend PostgreSQL ou MongoDB | [`seedgrid-audit-example`](examples/seedgrid-audit-example) ✅ |
+| **seedgrid-audit** | Trilha de auditoria por anotação `@SgAudit`, com backend PostgreSQL ou MongoDB | [`seedgrid-audit-example`](examples/seedgrid-audit-example) ✅ |
 | **seedgrid-apikeys** | Chaves de API com prefixo, hash e escopo, como alternativa ao JWT | [`seedgrid-apikeys-example`](examples/seedgrid-apikeys-example) |
 
 ### Multi-tenant — escolha **um** modelo

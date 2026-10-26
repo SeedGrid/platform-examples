@@ -41,7 +41,7 @@ long               increment(String key, Duration ttl);   // INCR + EXPIRE atôm
 
 void               delete(String key);                    // <- este é o "evict"
 
-<T> T              withLock(String key, Duration ttl, Supplier<T> fn); // lock por chave
+<T> T              tryWithLock(String key, Duration ttl, Duration espera, Supplier<T> fn); // lock por chave (espera 0 = falha na hora; esgotada: CacheLockBusyException)
 ```
 
 Notas importantes:
@@ -140,3 +140,6 @@ curl -s http://localhost:8089/items/_stats; echo
   exigida pra rodar in-memory.
 - Como o cache é `@ApplicationScoped` (estado vive por toda a JVM de teste), testes devem usar
   **chaves/ids distintos** e comparar **deltas** de contador, nunca valores absolutos.
+
+## Annotations Sg (C4)
+`ProductService` mostra `@SgCacheResult`/`@SgCacheKey`, `@SgCacheInvalidate` e `@SgCacheInvalidateAll`; `SgCacheResultAnnotationTest` prova hit/miss, invalidacao, auto-chamada, 50 threads no mesmo miss e o `default-ttl` obrigatorio (`seedgrid.cache.annotations.default-ttl`).
