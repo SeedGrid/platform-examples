@@ -70,14 +70,14 @@ class ProductCompanyIsolationTest {
         assertEquals(1, idsForB.size(), "B so ve os proprios produtos");
 
         // Isolamento: A nao consegue ler o produto de B, mesmo sabendo o id.
-        // EntityNotFoundException e mapeada pelo ApiExceptionHandler do commons como erro de
-        // negocio (400), nao 404 — convencao do framework para nao vazar existencia do recurso.
+        // EntityNotFoundException e mapeada pelo ApiExceptionHandler do commons como 404 (o recurso de
+        // outra empresa e' tratado como inexistente para quem consulta).
         given()
                 .header("Authorization", "Bearer " + bearerA)
                 .when()
                 .get("/api/products/" + productBId)
                 .then()
-                .statusCode(400);
+                .statusCode(404);
     }
 
     @Transactional
