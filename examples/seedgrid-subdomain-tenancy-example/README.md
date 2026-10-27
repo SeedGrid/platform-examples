@@ -159,6 +159,15 @@ O `dev.env` traz tudo comentado. Na prática, só estes importam para rodar loca
 | `SEEDGRID_SUBDOMAIN_TENANCY_TENANT_DB_URL` | `...5439` | servidor onde os bancos de tenant são criados (sem nome de banco) |
 | `HTTP_PORT` | `8085` | porta da aplicação |
 
+### Bloqueio geral do billing (402)
+
+O `application.properties` liga `seedgrid.billing.access-gate.enabled=true`: uma conta **sem assinatura
+vigente** recebe `402` em qualquer endpoint autenticado. Ficam liberados o login e `/public`, `/q/`,
+`/me/plans`, `/me/subscription`, `/me/usage`, `/me/billing` e os prefixos de
+`seedgrid.billing.access-gate.allowed-paths` (lista separada por vírgula). Um tenant novo nasce com trial,
+então só vê o 402 quando o trial vence ou a assinatura é cancelada. O `BillingAccessGateIT` demonstra isso.
+Para desligar, remova a propriedade (o padrão da extensão é `false`).
+
 Todo nome de variável aqui é o **nome canônico** que a extensão lê. Se precisar
 descobrir outro, ele está no `microprofile-config.properties` publicado dentro do jar:
 
