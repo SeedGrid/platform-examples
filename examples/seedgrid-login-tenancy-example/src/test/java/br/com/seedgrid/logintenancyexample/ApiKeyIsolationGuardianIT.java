@@ -115,7 +115,7 @@ class ApiKeyIsolationGuardianIT {
 
     @Test
     void keyOfACannotReadProductOfB() {
-        given().header("x-api-key", keyA).get("/api/products/" + productB).then().statusCode(400);
+        given().header("x-api-key", keyA).get("/api/products/" + productB).then().statusCode(404);
     }
 
     @Test
