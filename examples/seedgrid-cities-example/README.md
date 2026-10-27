@@ -56,7 +56,7 @@ A REST da extension exige a permissão `CITY_READ`. **A extension não tem auten
 |---|---|---|---|
 | PostgreSQL | `5439` | `jdbc:postgresql://localhost:5439/cities_example` | banco do exemplo (security, auditoria e a migration + seed da extension) |
 | Mailpit | `8025` (UI), `1025` (SMTP) | <http://localhost:8025> | e-mails da security (link de confirmação do primeiro login) |
-| Mockoon (ainda fora do compose) | `3100` | <http://localhost:3100/cities-api/states> | back falso da REST da cities, sem o back real (ver abaixo); sem UI web, a edição é pelo aplicativo desktop |
+| Mockoon (perfil `mock`, só sobe sob demanda) | `3100` | <http://localhost:3100/cities-api/states> | back falso da REST da cities, sem o back real (ver abaixo); sem UI web, a edição é pelo aplicativo desktop |
 | Aplicação | `8099` | <http://localhost:8099> | o exemplo |
 
 Redis e MinIO não são usados.
@@ -66,14 +66,12 @@ Redis e MinIO não são usados.
 Quem faz o front sem subir o back usa o Mockoon: `mocks/cities.mockoon.json` (na extension) tem as 13 rotas de `/cities-api` com dados fictícios em pt-BR (5 países, estados e capitais conhecidas, ids estáveis).
 
 ```bash
-# da pasta do repositório da extension (seedgrid-quarkus-ext-cities); no Git Bash use // no início do caminho do contêiner
-podman run -d --name cities-mock -p 127.0.0.1:3100:3100 \
-  -v "$PWD/mocks/cities.mockoon.json:/data/cities.mockoon.json:ro" \
-  mockoon/cli:9.9.0 --data /data/cities.mockoon.json --port 3100 --disable-admin-api
+# da pasta infra/ deste repositório (podman compose ou docker compose)
+podman compose --profile mock up -d mockoon
 curl http://localhost:3100/cities-api/states
 ```
 
-O serviço `mockoon` (perfil `mock`, `docker compose --profile mock up -d mockoon`) **ainda não está no `infra/compose.yml`** deste repositório de exemplos: a edição do compose fica com o dono (pendência registrada na T1.10 do plano). O mock **não exige token** (o contrato de autenticação é do host; a REST real devolve 401 sem o token).
+O serviço `mockoon` (`mockoon/cli:9.9.0`, perfil `mock`, porta `3100`, sem UI web) está no `infra/compose.yml` e não sobe com o `up -d` comum: só com `--profile mock`. Ele serve `mocks/cities.mockoon.json` deste repositório, que é uma **cópia**: a **fonte** é `mocks/cities.mockoon.json` do repositório da extension (`seedgrid-quarkus-ext-cities`); ao mudar o mock, edite lá e recopie. O mock **não exige token** (o contrato de autenticação é do host; a REST real devolve 401 sem o token).
 
 ## Testes
 

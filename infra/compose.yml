@@ -118,6 +118,22 @@ services:
       - "1025:1025"   # SMTP
       - "8025:8025"   # caixa de entrada web
 
+  # Back falso da REST da cities (/cities-api/...), para quem faz o front sem subir o back.
+  # So sobe com o perfil "mock": docker compose --profile mock up -d mockoon
+  # (ou podman compose). Sem UI web; a edicao do mock e pelo aplicativo desktop do Mockoon.
+  # A FONTE do mock e o repositorio da extension (seedgrid-quarkus-ext-cities/mocks/cities.mockoon.json);
+  # mocks/cities.mockoon.json aqui e uma copia, ressincronizada quando a fonte muda.
+  # Responde em http://localhost:3100/cities-api/states (nao exige token).
+  mockoon:
+    image: mockoon/cli:9.9.0
+    container_name: seedgrid-examples-mockoon
+    profiles: ["mock"]
+    command: ["--data", "/data/cities.mockoon.json", "--port", "3100", "--disable-admin-api"]
+    ports:
+      - "3100:3100"
+    volumes:
+      - ../mocks/cities.mockoon.json:/data/cities.mockoon.json:ro
+
 volumes:
   seedgrid-examples-pg:
   seedgrid-examples-mongo:

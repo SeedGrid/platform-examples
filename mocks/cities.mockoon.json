@@ -1,0 +1,489 @@
+{
+  "uuid": "5c115a38-1211-461a-86ca-c94da82ea71c",
+  "lastMigration": 33,
+  "name": "cities (back falso)",
+  "endpointPrefix": "cities-api",
+  "latency": 0,
+  "port": 3100,
+  "hostname": "0.0.0.0",
+  "folders": [],
+  "routes": [
+    {
+      "uuid": "c49b6842-989f-4097-892a-b93ee24c2aaa",
+      "type": "http",
+      "documentation": "Lista paginada de paises (5) (amostra real da API; a REST real exige o token com CITY_READ)",
+      "method": "get",
+      "endpoint": "countries",
+      "responses": [
+        {
+          "uuid": "782c2c8d-85ba-4afc-84f1-d557d3d4d705",
+          "body": "{\n  \"content\": [\n    {\n      \"id\": 1,\n      \"code\": \"BR\",\n      \"name\": \"Brasil\"\n    },\n    {\n      \"id\": 2,\n      \"code\": \"ES\",\n      \"name\": \"Espanha\"\n    },\n    {\n      \"id\": 5,\n      \"code\": \"US\",\n      \"name\": \"Estados Unidos\"\n    },\n    {\n      \"id\": 3,\n      \"code\": \"FR\",\n      \"name\": \"França\"\n    },\n    {\n      \"id\": 4,\n      \"code\": \"PT\",\n      \"name\": \"Portugal\"\n    }\n  ],\n  \"page\": 0,\n  \"size\": 10,\n  \"totalElements\": 5,\n  \"totalPages\": 1,\n  \"last\": true\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": true,
+          "fallbackTo404": false,
+          "default": true
+        }
+      ],
+      "enabled": true,
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "5c65f53d-e446-4385-84d6-2c9d86d42f0f",
+      "type": "http",
+      "documentation": "Pais por id (amostra real da API; a REST real exige o token com CITY_READ)",
+      "method": "get",
+      "endpoint": "countries/:id",
+      "responses": [
+        {
+          "uuid": "9de6bb6b-69c9-433f-84b6-47c42e39ea6f",
+          "body": "{\n  \"id\": 1,\n  \"code\": \"BR\",\n  \"name\": \"Brasil\"\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": true,
+          "fallbackTo404": false,
+          "default": true
+        }
+      ],
+      "enabled": true,
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "dc22e1c6-243a-44c7-8d0d-1e87f346b980",
+      "type": "http",
+      "documentation": "Estados de um pais (pagina de 3) (amostra real da API; a REST real exige o token com CITY_READ)",
+      "method": "get",
+      "endpoint": "countries/:id/states",
+      "responses": [
+        {
+          "uuid": "a4eb8f64-232b-49ae-8b4b-8a0433ac7122",
+          "body": "{\n  \"content\": [\n    {\n      \"id\": 12,\n      \"uf\": \"AC\",\n      \"name\": \"Acre\"\n    },\n    {\n      \"id\": 27,\n      \"uf\": \"AL\",\n      \"name\": \"Alagoas\"\n    },\n    {\n      \"id\": 16,\n      \"uf\": \"AP\",\n      \"name\": \"Amapá\"\n    }\n  ],\n  \"page\": 0,\n  \"size\": 3,\n  \"totalElements\": 27,\n  \"totalPages\": 9,\n  \"last\": false\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": true,
+          "fallbackTo404": false,
+          "default": true
+        }
+      ],
+      "enabled": true,
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "3ad5dfa9-af1e-4d5d-8691-03eaa247a897",
+      "type": "http",
+      "documentation": "Cidades de um estado de um pais (amostra real da API; a REST real exige o token com CITY_READ)",
+      "method": "get",
+      "endpoint": "countries/:id/states/:stateId/cities",
+      "responses": [
+        {
+          "uuid": "cea7d3ba-eba5-4807-8617-3a1566088cc6",
+          "body": "{\n  \"content\": [\n    {\n      \"id\": 31,\n      \"name\": \"Adamantina\",\n      \"ibgeCode\": \"3500105\",\n      \"state\": {\n        \"id\": 35,\n        \"uf\": \"SP\",\n        \"name\": \"São Paulo\"\n      },\n      \"country\": {\n        \"id\": 1,\n        \"code\": \"BR\",\n        \"name\": \"Brasil\"\n      }\n    },\n    {\n      \"id\": 33,\n      \"name\": \"Adolfo\",\n      \"ibgeCode\": \"3500204\",\n      \"state\": {\n        \"id\": 35,\n        \"uf\": \"SP\",\n        \"name\": \"São Paulo\"\n      },\n      \"country\": {\n        \"id\": 1,\n        \"code\": \"BR\",\n        \"name\": \"Brasil\"\n      }\n    },\n    {\n      \"id\": 63,\n      \"name\": \"Aguaí\",\n      \"ibgeCode\": \"3500303\",\n      \"state\": {\n        \"id\": 35,\n        \"uf\": \"SP\",\n        \"name\": \"São Paulo\"\n      },\n      \"country\": {\n        \"id\": 1,\n        \"code\": \"BR\",\n        \"name\": \"Brasil\"\n      }\n    }\n  ],\n  \"page\": 0,\n  \"size\": 3,\n  \"totalElements\": 645,\n  \"totalPages\": 215,\n  \"last\": false\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": true,
+          "fallbackTo404": false,
+          "default": true
+        }
+      ],
+      "enabled": true,
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "0b2df1fc-d6ce-4614-83f7-10a17f5f1295",
+      "type": "http",
+      "documentation": "Lista de estados (27) (amostra real da API; a REST real exige o token com CITY_READ)",
+      "method": "get",
+      "endpoint": "states",
+      "responses": [
+        {
+          "uuid": "a4bec9b1-3a8c-40e7-8642-7d96a7905196",
+          "body": "{\n  \"content\": [\n    {\n      \"id\": 12,\n      \"uf\": \"AC\",\n      \"name\": \"Acre\"\n    },\n    {\n      \"id\": 27,\n      \"uf\": \"AL\",\n      \"name\": \"Alagoas\"\n    },\n    {\n      \"id\": 16,\n      \"uf\": \"AP\",\n      \"name\": \"Amapá\"\n    },\n    {\n      \"id\": 13,\n      \"uf\": \"AM\",\n      \"name\": \"Amazonas\"\n    },\n    {\n      \"id\": 29,\n      \"uf\": \"BA\",\n      \"name\": \"Bahia\"\n    },\n    {\n      \"id\": 23,\n      \"uf\": \"CE\",\n      \"name\": \"Ceará\"\n    },\n    {\n      \"id\": 53,\n      \"uf\": \"DF\",\n      \"name\": \"Distrito Federal\"\n    },\n    {\n      \"id\": 32,\n      \"uf\": \"ES\",\n      \"name\": \"Espírito Santo\"\n    },\n    {\n      \"id\": 52,\n      \"uf\": \"GO\",\n      \"name\": \"Goiás\"\n    },\n    {\n      \"id\": 21,\n      \"uf\": \"MA\",\n      \"name\": \"Maranhão\"\n    },\n    {\n      \"id\": 51,\n      \"uf\": \"MT\",\n      \"name\": \"Mato Grosso\"\n    },\n    {\n      \"id\": 50,\n      \"uf\": \"MS\",\n      \"name\": \"Mato Grosso do Sul\"\n    },\n    {\n      \"id\": 31,\n      \"uf\": \"MG\",\n      \"name\": \"Minas Gerais\"\n    },\n    {\n      \"id\": 41,\n      \"uf\": \"PR\",\n      \"name\": \"Paraná\"\n    },\n    {\n      \"id\": 25,\n      \"uf\": \"PB\",\n      \"name\": \"Paraíba\"\n    },\n    {\n      \"id\": 15,\n      \"uf\": \"PA\",\n      \"name\": \"Pará\"\n    },\n    {\n      \"id\": 26,\n      \"uf\": \"PE\",\n      \"name\": \"Pernambuco\"\n    },\n    {\n      \"id\": 22,\n      \"uf\": \"PI\",\n      \"name\": \"Piauí\"\n    },\n    {\n      \"id\": 24,\n      \"uf\": \"RN\",\n      \"name\": \"Rio Grande do Norte\"\n    },\n    {\n      \"id\": 43,\n      \"uf\": \"RS\",\n      \"name\": \"Rio Grande do Sul\"\n    },\n    {\n      \"id\": 33,\n      \"uf\": \"RJ\",\n      \"name\": \"Rio de Janeiro\"\n    },\n    {\n      \"id\": 11,\n      \"uf\": \"RO\",\n      \"name\": \"Rondônia\"\n    },\n    {\n      \"id\": 14,\n      \"uf\": \"RR\",\n      \"name\": \"Roraima\"\n    },\n    {\n      \"id\": 42,\n      \"uf\": \"SC\",\n      \"name\": \"Santa Catarina\"\n    },\n    {\n      \"id\": 28,\n      \"uf\": \"SE\",\n      \"name\": \"Sergipe\"\n    },\n    {\n      \"id\": 35,\n      \"uf\": \"SP\",\n      \"name\": \"São Paulo\"\n    },\n    {\n      \"id\": 17,\n      \"uf\": \"TO\",\n      \"name\": \"Tocantins\"\n    }\n  ],\n  \"page\": 0,\n  \"size\": 100,\n  \"totalElements\": 27,\n  \"totalPages\": 1,\n  \"last\": true\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": true,
+          "fallbackTo404": false,
+          "default": true
+        }
+      ],
+      "enabled": true,
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "0405d162-2a23-4400-85d6-b6d56128b08a",
+      "type": "http",
+      "documentation": "Estado por UF (amostra real da API; a REST real exige o token com CITY_READ)",
+      "method": "get",
+      "endpoint": "states/by-uf/:uf",
+      "responses": [
+        {
+          "uuid": "d4742c2b-e9f2-4dfc-8a5e-ee5280ca17c0",
+          "body": "{\n  \"id\": 35,\n  \"uf\": \"SP\",\n  \"name\": \"São Paulo\"\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": true,
+          "fallbackTo404": false,
+          "default": true
+        }
+      ],
+      "enabled": true,
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "2c93a1ca-4817-4a00-8693-f916fc33a6c5",
+      "type": "http",
+      "documentation": "Estado por codigo IBGE (amostra real da API; a REST real exige o token com CITY_READ)",
+      "method": "get",
+      "endpoint": "states/:id",
+      "responses": [
+        {
+          "uuid": "e66b78b4-049d-4fcc-86a3-d716cf36ff1d",
+          "body": "{\n  \"id\": 35,\n  \"uf\": \"SP\",\n  \"name\": \"São Paulo\"\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": true,
+          "fallbackTo404": false,
+          "default": true
+        }
+      ],
+      "enabled": true,
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "e77d41ab-0d11-4dec-8586-396f97cb1d4c",
+      "type": "http",
+      "documentation": "Cidades de um estado (pagina de 3) (amostra real da API; a REST real exige o token com CITY_READ)",
+      "method": "get",
+      "endpoint": "states/:id/cities",
+      "responses": [
+        {
+          "uuid": "d9e0594d-5f9b-420e-8c21-0f17caf44f65",
+          "body": "{\n  \"content\": [\n    {\n      \"id\": 31,\n      \"name\": \"Adamantina\",\n      \"ibgeCode\": \"3500105\",\n      \"state\": {\n        \"id\": 35,\n        \"uf\": \"SP\",\n        \"name\": \"São Paulo\"\n      },\n      \"country\": {\n        \"id\": 1,\n        \"code\": \"BR\",\n        \"name\": \"Brasil\"\n      }\n    },\n    {\n      \"id\": 33,\n      \"name\": \"Adolfo\",\n      \"ibgeCode\": \"3500204\",\n      \"state\": {\n        \"id\": 35,\n        \"uf\": \"SP\",\n        \"name\": \"São Paulo\"\n      },\n      \"country\": {\n        \"id\": 1,\n        \"code\": \"BR\",\n        \"name\": \"Brasil\"\n      }\n    },\n    {\n      \"id\": 63,\n      \"name\": \"Aguaí\",\n      \"ibgeCode\": \"3500303\",\n      \"state\": {\n        \"id\": 35,\n        \"uf\": \"SP\",\n        \"name\": \"São Paulo\"\n      },\n      \"country\": {\n        \"id\": 1,\n        \"code\": \"BR\",\n        \"name\": \"Brasil\"\n      }\n    }\n  ],\n  \"page\": 0,\n  \"size\": 3,\n  \"totalElements\": 645,\n  \"totalPages\": 215,\n  \"last\": false\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": true,
+          "fallbackTo404": false,
+          "default": true
+        }
+      ],
+      "enabled": true,
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "f710467f-120a-4c92-8846-2227fd46b264",
+      "type": "http",
+      "documentation": "Busca paginada de cidades (pagina de 3) (amostra real da API; a REST real exige o token com CITY_READ)",
+      "method": "get",
+      "endpoint": "cities",
+      "responses": [
+        {
+          "uuid": "84591c64-9be1-4673-8259-309876fe0bbc",
+          "body": "{\n  \"content\": [\n    {\n      \"id\": 1,\n      \"name\": \"Abadia de Goiás\",\n      \"ibgeCode\": \"5200050\",\n      \"state\": {\n        \"id\": 52,\n        \"uf\": \"GO\",\n        \"name\": \"Goiás\"\n      },\n      \"country\": {\n        \"id\": 1,\n        \"code\": \"BR\",\n        \"name\": \"Brasil\"\n      }\n    },\n    {\n      \"id\": 2,\n      \"name\": \"Abadia dos Dourados\",\n      \"ibgeCode\": \"3100104\",\n      \"state\": {\n        \"id\": 31,\n        \"uf\": \"MG\",\n        \"name\": \"Minas Gerais\"\n      },\n      \"country\": {\n        \"id\": 1,\n        \"code\": \"BR\",\n        \"name\": \"Brasil\"\n      }\n    },\n    {\n      \"id\": 3,\n      \"name\": \"Abadiânia\",\n      \"ibgeCode\": \"5200100\",\n      \"state\": {\n        \"id\": 52,\n        \"uf\": \"GO\",\n        \"name\": \"Goiás\"\n      },\n      \"country\": {\n        \"id\": 1,\n        \"code\": \"BR\",\n        \"name\": \"Brasil\"\n      }\n    }\n  ],\n  \"page\": 0,\n  \"size\": 3,\n  \"totalElements\": 5570,\n  \"totalPages\": 1857,\n  \"last\": false\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": true,
+          "fallbackTo404": false,
+          "default": true
+        }
+      ],
+      "enabled": true,
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "9248a132-04ef-4cc6-8475-fc67e4a4ef28",
+      "type": "http",
+      "documentation": "Cidade por codigo IBGE de 7 digitos (amostra real da API; a REST real exige o token com CITY_READ)",
+      "method": "get",
+      "endpoint": "cities/by-ibge-code/:code",
+      "responses": [
+        {
+          "uuid": "eeee210c-e268-4330-8378-90ec675c76d4",
+          "body": "{\n  \"id\": 4853,\n  \"name\": \"São Paulo\",\n  \"ibgeCode\": \"3550308\",\n  \"state\": {\n    \"id\": 35,\n    \"uf\": \"SP\",\n    \"name\": \"São Paulo\"\n  },\n  \"country\": {\n    \"id\": 1,\n    \"code\": \"BR\",\n    \"name\": \"Brasil\"\n  }\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": true,
+          "fallbackTo404": false,
+          "default": true
+        }
+      ],
+      "enabled": true,
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "a9747e7b-f8e2-4365-8282-567efbef93c1",
+      "type": "http",
+      "documentation": "Cidade por id (amostra real da API; a REST real exige o token com CITY_READ)",
+      "method": "get",
+      "endpoint": "cities/:id",
+      "responses": [
+        {
+          "uuid": "05f18177-3e63-49c2-837a-838f0a5012d0",
+          "body": "{\n  \"id\": 4853,\n  \"name\": \"São Paulo\",\n  \"ibgeCode\": \"3550308\",\n  \"state\": {\n    \"id\": 35,\n    \"uf\": \"SP\",\n    \"name\": \"São Paulo\"\n  },\n  \"country\": {\n    \"id\": 1,\n    \"code\": \"BR\",\n    \"name\": \"Brasil\"\n  }\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": true,
+          "fallbackTo404": false,
+          "default": true
+        }
+      ],
+      "enabled": true,
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "958deeb6-6218-4672-894c-7395633f630f",
+      "type": "http",
+      "documentation": "Regioes do Brasil (amostra real da API; a REST real exige o token com CITY_READ)",
+      "method": "get",
+      "endpoint": "regions",
+      "responses": [
+        {
+          "uuid": "33d27787-fc4e-425a-8169-ea40973233d4",
+          "body": "[\n  {\n    \"name\": \"Centro-Oeste\"\n  },\n  {\n    \"name\": \"Nordeste\"\n  },\n  {\n    \"name\": \"Norte\"\n  },\n  {\n    \"name\": \"Sudeste\"\n  },\n  {\n    \"name\": \"Sul\"\n  }\n]",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": true,
+          "fallbackTo404": false,
+          "default": true
+        }
+      ],
+      "enabled": true,
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "75ec6356-f05b-41e8-8d7e-b8e4ad7ba000",
+      "type": "http",
+      "documentation": "Estados de uma regiao (amostra real da API; a REST real exige o token com CITY_READ)",
+      "method": "get",
+      "endpoint": "regions/:region/states",
+      "responses": [
+        {
+          "uuid": "284b6caa-7a98-4433-8dfd-3566012fb5c3",
+          "body": "[\n  {\n    \"id\": 32,\n    \"uf\": \"ES\",\n    \"name\": \"Espírito Santo\"\n  },\n  {\n    \"id\": 31,\n    \"uf\": \"MG\",\n    \"name\": \"Minas Gerais\"\n  },\n  {\n    \"id\": 33,\n    \"uf\": \"RJ\",\n    \"name\": \"Rio de Janeiro\"\n  },\n  {\n    \"id\": 35,\n    \"uf\": \"SP\",\n    \"name\": \"São Paulo\"\n  }\n]",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": true,
+          "fallbackTo404": false,
+          "default": true
+        }
+      ],
+      "enabled": true,
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    }
+  ],
+  "rootChildren": [
+    {
+      "type": "route",
+      "uuid": "c49b6842-989f-4097-892a-b93ee24c2aaa"
+    },
+    {
+      "type": "route",
+      "uuid": "5c65f53d-e446-4385-84d6-2c9d86d42f0f"
+    },
+    {
+      "type": "route",
+      "uuid": "dc22e1c6-243a-44c7-8d0d-1e87f346b980"
+    },
+    {
+      "type": "route",
+      "uuid": "3ad5dfa9-af1e-4d5d-8691-03eaa247a897"
+    },
+    {
+      "type": "route",
+      "uuid": "0b2df1fc-d6ce-4614-83f7-10a17f5f1295"
+    },
+    {
+      "type": "route",
+      "uuid": "0405d162-2a23-4400-85d6-b6d56128b08a"
+    },
+    {
+      "type": "route",
+      "uuid": "2c93a1ca-4817-4a00-8693-f916fc33a6c5"
+    },
+    {
+      "type": "route",
+      "uuid": "e77d41ab-0d11-4dec-8586-396f97cb1d4c"
+    },
+    {
+      "type": "route",
+      "uuid": "f710467f-120a-4c92-8846-2227fd46b264"
+    },
+    {
+      "type": "route",
+      "uuid": "9248a132-04ef-4cc6-8475-fc67e4a4ef28"
+    },
+    {
+      "type": "route",
+      "uuid": "a9747e7b-f8e2-4365-8282-567efbef93c1"
+    },
+    {
+      "type": "route",
+      "uuid": "958deeb6-6218-4672-894c-7395633f630f"
+    },
+    {
+      "type": "route",
+      "uuid": "75ec6356-f05b-41e8-8d7e-b8e4ad7ba000"
+    }
+  ],
+  "proxyMode": false,
+  "proxyHost": "",
+  "proxyRemovePrefix": false,
+  "tlsOptions": {
+    "enabled": false,
+    "type": "CERT",
+    "pfxPath": "",
+    "certPath": "",
+    "keyPath": "",
+    "caPath": "",
+    "passphrase": ""
+  },
+  "cors": true,
+  "headers": [
+    {
+      "key": "Content-Type",
+      "value": "application/json"
+    }
+  ],
+  "proxyReqHeaders": [
+    {
+      "key": "",
+      "value": ""
+    }
+  ],
+  "proxyResHeaders": [
+    {
+      "key": "",
+      "value": ""
+    }
+  ],
+  "data": [],
+  "callbacks": []
+}
