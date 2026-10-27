@@ -2,7 +2,7 @@
 
 App de exemplo, rodável, do `seedgrid-quarkus-ext-cities` (artefato `seedgrid-cities`): países, estados e cidades do Brasil semeados por migration, a REST opcional ligada e o uso da fachada `BrazilGeo` em código do host.
 
-A extension **migra sozinha** (histórico `flyway_schema_history_cities`) e semeia 5 países, 27 estados e 5.570 cidades — o exemplo não tem migration nem entidade própria.
+A extension **migra sozinha** (histórico `sg_flyway_schema_history_cities`) e semeia 5 países, 27 estados e 5.570 cidades — o exemplo não tem migration nem entidade própria.
 
 > **Versão de trabalho.** A `seedgrid-cities` `2026.10.0` ainda não foi publicada no Maven Central. Antes de rodar, instale-a no repositório local do Maven, a partir do repositório da extension: `mvn install -DskipTests -Dgpg.skip=true`.
 
@@ -88,5 +88,5 @@ mvn test -Dcities.test.jdbc-url=jdbc:postgresql://127.0.0.1:5432/cities_test   #
 
 - **Hibernate no dev mode:** o exemplo define `quarkus.hibernate-orm.validate-in-dev-mode=false`. O Quarkus valida o schema numa thread logo após subir o Hibernate, e a cities migra no `StartupEvent` (depois), então num banco vazio o log mostraria dois `ERROR ... missing table [sg_cities]` apesar de a API responder.
 - **`quarkus.hibernate-orm.packages`** lista as entidades da cities, da security, do commons e da auditoria (com várias extensions contribuindo entidades a lista é explícita).
-- **Flyway do host:** só `security` e `audit`; a cities migra sozinha, com histórico `flyway_schema_history_cities`.
+- **Flyway do host:** nenhum; `security`, `audit` e `cities` migram sozinhas, cada uma com seu histórico (`sg_flyway_schema_history_*`).
 - **Versões:** a `seedgrid-security` 2026.10.14 traz o commons compatível com a cities (a 2026.09.25 trazia um commons anterior e a subida falhava com `ClassNotFoundException: ...spis.ApiExceptionExtension`).

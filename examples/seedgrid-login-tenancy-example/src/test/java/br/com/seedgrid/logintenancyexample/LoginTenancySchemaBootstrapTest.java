@@ -33,7 +33,7 @@ class LoginTenancySchemaBootstrapTest {
             assertTrue(tableExists(conn, "sg_signup_request"), "tabela signup_request (login-tenancy)");
             assertTrue(tableExists(conn, "products"), "tabela products (app host)");
             assertTrue(
-                    tableExists(conn, "flyway_schema_history_login_tenancy"),
+                    tableExists(conn, "sg_flyway_schema_history_login_tenancy"),
                     "historico dedicado do login-tenancy");
         }
     }

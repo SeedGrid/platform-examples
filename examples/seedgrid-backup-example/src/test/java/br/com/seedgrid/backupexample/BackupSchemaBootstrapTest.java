@@ -44,7 +44,12 @@ class BackupSchemaBootstrapTest {
             assertTrue(adminHasPermission(conn, "NOTE_CREATE"), "ADMIN tem NOTE_CREATE");
             assertTrue(adminHasPermission(conn, "BACKUP_CREATE"), "ADMIN tem BACKUP_CREATE");
 
-            assertTrue(singleFlywayHistoryTable(conn), "flyway aplicou tudo numa unica tabela flyway_schema_history");
+            assertTrue(hostHistoryHasOnlyHostMigrations(conn),
+                    "flyway_schema_history do host so tem as migrations dele (as extensions tem historico proprio)");
+            for (String history : new String[] { "sg_flyway_schema_history_security", "sg_flyway_schema_history_audit",
+                    "sg_flyway_schema_history_backup" }) {
+                assertTrue(tableExists(conn, history), "historico proprio da extension: " + history);
+            }
         }
     }
 
@@ -78,11 +83,14 @@ class BackupSchemaBootstrapTest {
         }
     }
 
-    private boolean singleFlywayHistoryTable(Connection conn) throws Exception {
+    /** O host aplicou as migrations dele e nenhuma das extensions (security V2xx, audit V3xx, backup V4xx). */
+    private boolean hostHistoryHasOnlyHostMigrations(Connection conn) throws Exception {
         try (var ps = conn.prepareStatement(
-                "SELECT COUNT(*) FROM flyway_schema_history WHERE success = true")) {
+                "SELECT COUNT(*) FILTER (WHERE success), "
+                        + "COUNT(*) FILTER (WHERE version ~ '^[0-9]+$' AND version::int BETWEEN 200 AND 499) "
+                        + "FROM flyway_schema_history")) {
             try (ResultSet rs = ps.executeQuery()) {
-                return rs.next() && rs.getInt(1) > 0;
+                return rs.next() && rs.getInt(1) > 0 && rs.getInt(2) == 0;
             }
         }
     }

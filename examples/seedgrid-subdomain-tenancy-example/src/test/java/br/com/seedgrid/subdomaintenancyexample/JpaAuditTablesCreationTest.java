@@ -31,7 +31,7 @@ import io.quarkus.test.junit.QuarkusTest;
  * {@code seedgrid-audit-postgresql} — e' um exemplo de audit em MongoDB (ver o comentario no
  * application.properties: "Para JPA e preciso mexer no pom (audit-postgresql), nao basta a env
  * var"). O DDL {@code db/migration/audit} mora no jar do postgresql; sem ele o Flyway roda com zero
- * scripts, cria so' o {@code flyway_schema_history_audit} e loga "Migrations de audit executadas com
+ * scripts, cria so' o {@code sg_flyway_schema_history_audit} e loga "Migrations de audit executadas com
  * sucesso". Nenhuma tabela de audit aparece.</p>
  *
  * <p><b>Para reativar:</b> trocar {@code seedgrid-audit-mongodb} por
