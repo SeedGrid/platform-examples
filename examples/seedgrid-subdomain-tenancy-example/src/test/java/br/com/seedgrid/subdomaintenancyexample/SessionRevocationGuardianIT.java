@@ -22,7 +22,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 
-import br.com.seedgrid.commons.core.enums.StateEnum;
+import br.com.seedgrid.cities.enums.StateEnum;
 import br.com.seedgrid.subdomaintenancy.dtos.TenantSignupRequest;
 import br.com.seedgrid.subdomaintenancy.entities.Tenant;
 import br.com.seedgrid.subdomaintenancy.repositories.TenantRepository;
