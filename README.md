@@ -102,6 +102,7 @@ versão da tenancy e esquecer a do security, que só aparece muito depois e long
 | **seedgrid-backup** | Exportação agendada com retenção e notificação; destino em filesystem, S3, MinIO ou nuvem | [`seedgrid-backup-example`](examples/seedgrid-backup-example) |
 | **seedgrid-filemanagement** | Upload e download com backend intercambiável (filesystem, S3, MinIO) | [`seedgrid-filemanagement-example`](examples/seedgrid-filemanagement-example) |
 | **seedgrid-cache** | Cache com invalidação por evento e escopo por tenant | [`seedgrid-cache-example`](examples/seedgrid-cache-example) |
+| **seedgrid-business-days** | Feriados, perfil da semana e cálculo de dias úteis por empresa | [`seedgrid-business-days-example`](examples/seedgrid-business-days-example) |
 | **seedgrid-resilience** | Circuit breaker, retry e timeout com defaults sensatos | [`seedgrid-resilience-example`](examples/seedgrid-resilience-example) |
 | **seedgrid-whatsapp** | Envio por WhatsApp, agnóstico de provedor (Evolution API ou Cloud API) | [`seedgrid-whatsapp-example`](examples/seedgrid-whatsapp-example) |
 
