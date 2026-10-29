@@ -101,6 +101,7 @@ versão da tenancy e esquecer a do security, que só aparece muito depois e long
 | **seedgrid-billing** | Planos, assinaturas, período de teste e webhooks; implementação Stripe ou fake para desenvolvimento | [`seedgrid-billing-example`](examples/seedgrid-billing-example) |
 | **seedgrid-backup** | Exportação agendada com retenção e notificação; destino em filesystem, S3, MinIO ou nuvem | [`seedgrid-backup-example`](examples/seedgrid-backup-example) |
 | **seedgrid-notification** | O host publica eventos de negócio; a extension decide destinatários e canais (e-mail, WhatsApp), enfileira, tenta de novo e registra cada entrega | [`seedgrid-notification-example`](examples/seedgrid-notification-example) |
+| **seedgrid-security-social** | Login social (Google, Facebook, Apple) sobre a security; sobe inerte, com a lista de provedores vazia | [`seedgrid-security-social-example`](examples/seedgrid-security-social-example) |
 | **seedgrid-filemanagement** | Upload e download com backend intercambiável (filesystem, S3, MinIO) | [`seedgrid-filemanagement-example`](examples/seedgrid-filemanagement-example) |
 | **seedgrid-cache** | Cache com invalidação por evento e escopo por tenant | [`seedgrid-cache-example`](examples/seedgrid-cache-example) |
 | **seedgrid-business-days** | Feriados, perfil da semana e cálculo de dias úteis por empresa | [`seedgrid-business-days-example`](examples/seedgrid-business-days-example) |
