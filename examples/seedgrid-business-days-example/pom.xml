@@ -65,13 +65,8 @@
             <version>1.18.42</version>
             <scope>provided</scope>
         </dependency>
-        <!-- SeedGrid: business-days protege /business-days com @PermissionsAllowed e le a empresa e a UF do token;
-             por isso o exemplo usa o seedgrid-security (login, roles e permissions). -->
-        <dependency>
-            <groupId>br.com.seedgrid</groupId>
-            <artifactId>seedgrid-security</artifactId>
-            <version>2026.10.22</version>
-        </dependency>
+        <!-- SeedGrid: a business-days e agnostica (sem security); a REST dela so existe num host com security, entao este
+             exemplo expoe os servicos dela por um recurso proprio (CalendarDemoResource). -->
         <dependency>
             <groupId>br.com.seedgrid</groupId>
             <artifactId>seedgrid-business-days</artifactId>

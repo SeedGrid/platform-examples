@@ -1,18 +1,17 @@
 # seedgrid-business-days-example
 
-App de exemplo, rodável, do `seedgrid-quarkus-ext-business-days`: feriados, perfil da semana e cálculo de
-dias úteis por REST, protegido por RBAC (`seedgrid-security`, que também informa a empresa e a UF).
-
-O exemplo não tem domínio próprio: tudo vem da extension.
+App de exemplo, rodável, do `seedgrid-quarkus-ext-business-days`, num host **sem `seedgrid-security`**: a extension é
+agnóstica. Sem `quarkus-security` a REST própria dela (`/business-days/**`) não existe (responde `404`, nunca uma rota
+desprotegida); o host expõe o que quer chamando os serviços da extension (`BusinessDayService`, `HolidayService`)
+no `CalendarDemoResource`. O calendário é global (sem escopo de empresa).
 
 ## Fluxo demonstrado
 
-1. `POST /public/auth/login` — admin do bootstrap da security.
-2. `GET /business-days/check?date=2026-04-21` — Tiradentes: feriado nacional semeado, não é dia útil.
-3. `GET /business-days/count?from=2026-04-20&to=2026-04-24` — 4 dias úteis (a terça é feriado).
-4. `GET /business-days/add?from=2026-04-20&days=2` — anda 2 dias úteis pulando o feriado (quinta 23).
-5. `POST /business-days/holidays` `{"name":"Feriado da empresa","month":4,"day":22,"year":2026}` — feriado só da
-   empresa; a contagem do passo 3 cai para 3. Repetir a data devolve `409`.
+1. `GET /demo/business-days/check?date=2026-04-21` — Tiradentes: feriado nacional semeado, não é dia útil.
+2. `GET /demo/business-days/count?from=2026-04-20&to=2026-04-24` — 4 dias úteis (a terça é feriado).
+3. `GET /demo/business-days/add?from=2026-04-20&days=2` — anda 2 dias úteis pulando o feriado (quinta 23).
+4. `POST /demo/business-days/holidays` `{"name":"Feriado da empresa","month":4,"day":22,"year":2026}` — feriado
+   próprio; a contagem do passo 2 cai para 3.
 
 ## Como rodar
 
@@ -21,15 +20,14 @@ O exemplo não tem domínio próprio: tudo vem da extension.
 mvn verify            # sobe Postgres via Testcontainers automaticamente
 ```
 
-Swagger em `http://localhost:8093/q/swagger-ui`. Login do `dev.env`: `admin@example.com` / `Admin@123`.
+Swagger em `http://localhost:8093/q/swagger-ui`.
 
 ## Testes
 
-`BusinessDaysFlowTest` — sem token é `401`; feriado nacional semeado não é dia útil; feriado da empresa muda
-a contagem e o deslocamento; data repetida é `409`. As migrations da security e da business-days rodam sozinhas,
-cada uma no seu histórico do Flyway.
+`BusinessDaysFlowTest` — a REST da extension é `404` sem security; feriado nacional semeado não é dia útil; feriado
+próprio muda a contagem e o deslocamento. A extension migra sozinha, no histórico próprio do Flyway.
 
 ## Configuração
 
-`quarkus.hibernate-orm.packages` precisa listar `br.com.seedgrid.businessdays.entities` junto das entidades da
-security, do commons e da cities. O Flyway do host fica sem migrations: a extension migra sozinha.
+`quarkus.hibernate-orm.packages` lista `br.com.seedgrid.businessdays.entities` e as do commons. O Flyway do host fica
+sem migrations. Para ter a REST da extension (com RBAC), acrescente o `seedgrid-security` ao host.
