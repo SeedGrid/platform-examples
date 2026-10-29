@@ -111,6 +111,7 @@ versão da tenancy e esquecer a do security, que só aparece muito depois e long
 
 | extensão | o que resolve | exemplo |
 |---|---|---|
+| **seedgrid-exchange** | Cotação de moedas buscada por robô numa fonte configurável, com histórico, retentativa e série | [`seedgrid-exchange-example`](examples/seedgrid-exchange-example) |
 | **seedgrid-cities** | Países, estados e cidades do Brasil (5 / 27 / 5.570) semeados por migration, com métodos auxiliares (`BrazilGeo`) e REST opcional | [`seedgrid-cities-example`](examples/seedgrid-cities-example) |
 
 ✅ = verificado: os passos acima foram executados a partir de banco vazio e a
