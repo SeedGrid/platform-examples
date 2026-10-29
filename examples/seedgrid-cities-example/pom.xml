@@ -58,20 +58,6 @@
             <artifactId>quarkus-hibernate-validator</artifactId>
         </dependency>
 
-        <!-- SeedGrid: a cities e agnostica de security (nao tem autenticacao propria); quem autentica e o host,
-             aqui a seedgrid-security (login, JWT, roles/permissions e o admin do bootstrap). A V1203 da cities
-             liga CITY_READ a role ADMIN quando as tabelas da security existem. -->
-        <dependency>
-            <groupId>br.com.seedgrid</groupId>
-            <artifactId>seedgrid-security</artifactId>
-            <version>2026.10.22</version>
-        </dependency>
-        <dependency>
-            <groupId>br.com.seedgrid</groupId>
-            <artifactId>seedgrid-audit-postgresql</artifactId>
-            <version>2026.10.22</version>
-            <scope>runtime</scope>
-        </dependency>
         <!-- Versao de trabalho da cities: instale antes com `mvn install` no repositorio da extension
              (ainda nao publicada no Maven Central). -->
         <dependency>
