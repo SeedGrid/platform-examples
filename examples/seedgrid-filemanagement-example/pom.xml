@@ -45,6 +45,28 @@
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-smallrye-openapi</artifactId>
         </dependency>
+        <!-- Banco: so' para ligar os ANEXOS (seedgrid.filemanagement.registry-table.enabled=true). A lib nao traz
+             Hibernate/JDBC/Flyway (sao optional), o host declara. -->
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-hibernate-orm</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-jdbc-postgresql</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-flyway</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-flyway-postgresql</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-hibernate-validator</artifactId>
+        </dependency>
 
         <!-- Lombok: NAO vem transitivo. Precisa da dependency (provided) + annotationProcessorPath
              no compiler-plugin (mais abaixo). A lib seedgrid-filemanagement usa Lombok nos seus
@@ -71,9 +93,23 @@
             <version>2026.10.22</version>
         </dependency>
 
+        <!-- seedgrid-commons e' OPTIONAL na filemanagement: so' quem liga os anexos precisa dele (BaseEntity da
+             entidade Attachment). -->
+        <dependency>
+            <groupId>br.com.seedgrid</groupId>
+            <artifactId>seedgrid-commons</artifactId>
+            <version>2026.10.22</version>
+        </dependency>
+
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>3.27.6</version>
             <scope>test</scope>
         </dependency>
         <dependency>

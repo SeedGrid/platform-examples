@@ -14,6 +14,7 @@
 CREATE DATABASE apikeys_example;
 CREATE DATABASE testeaudit;
 CREATE DATABASE privacy_example;
+CREATE DATABASE filemanagement_example;
 
 -- Multi-tenant
 -- login-tenancy: banco unico, tudo aqui dentro

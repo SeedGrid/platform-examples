@@ -51,14 +51,15 @@ class StorageRegistryTest {
         assertAll("backend filesystem resolvido",
                 () -> assertNotNull(storage),
                 () -> assertEquals("filesystem", storage.typeIdentifier()),
-                () -> assertEquals("FilesystemStorage", storage.getClass().getSimpleName()));
+                // com os ANEXOS ligados (application.properties) o registry devolve o storage decorado: grava a linha do anexo
+                () -> assertEquals("AttachmentTrackingFileStorage", storage.getClass().getSimpleName()));
     }
 
     @Test
     void registry_unknownType_throwsStorageNotFound() {
         StorageNotFoundException ex = assertThrows(StorageNotFoundException.class,
-                () -> registry.get("dropbox", Map.of("base-path", tempDir.toString())));
-        assertTrue(ex.getMessage().contains("No FileStorageFactory found for type: dropbox"),
+                () -> registry.get("tipo-inexistente", Map.of("base-path", tempDir.toString())));
+        assertTrue(ex.getMessage().contains("No FileStorageFactory found for type: tipo-inexistente"),
                 "mensagem: " + ex.getMessage());
     }
 }
