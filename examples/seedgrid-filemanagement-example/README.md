@@ -39,9 +39,9 @@ O que o host precisa fazer (tudo está no `application.properties` e no `pom.xml
    no `application.properties` quando o app é compilado.
 2. **Declarar o que a lib não traz**: `quarkus-hibernate-orm`, `quarkus-jdbc-postgresql`, `quarkus-flyway`,
    `quarkus-flyway-postgresql` e `seedgrid-commons` (a lib os marca `optional`, para não arrastá-los a quem não usa banco).
-3. **Mapear a entidade** com `quarkus.hibernate-orm.mapping-files=META-INF/filemanagement-orm.xml` (um XML de uma linha,
-   `src/main/resources/META-INF/filemanagement-orm.xml`) e `quarkus.hibernate-orm.packages` incluindo
-   `br.com.seedgrid.commons.persistence`. **Não use `quarkus.index-dependency` para isso: não funciona** (achado A8, abaixo).
+3. **Nada de mapeamento**: a extension mapeia a entidade `Attachment` sozinha quando a chave está ligada (um *build step*, como
+   `cities` e `security`). O host **não** configura `quarkus.hibernate-orm.mapping-files`, `quarkus.hibernate-orm.packages`,
+   `quarkus.index-dependency` nem `quarkus.hibernate-orm.validate-in-dev-mode` (a extension traz `false` como padrão).
 4. **Deixar a migration com a lib**: o *runner* da lib aplica a `V1300` na subida, com histórico próprio
    (`sg_flyway_schema_history_filemanagement`). Este app não liga o Flyway do Quarkus. Um host com várias bases usa
    `seedgrid.migrations.host-managed=true` e chama `FileManagementMigrations.migrate(dataSource)` em cada base.
@@ -103,20 +103,20 @@ Conferir no banco: `podman exec seedgrid-examples-postgres psql -U postgres -d f
 
 ### Achados montando este exemplo (provados aqui)
 
-- **A8 — `quarkus.index-dependency` não liga a entidade `Attachment`.** A lib deixa `Attachment` fora do índice Jandex
-  de propósito (para não exigir a tabela de hosts que não ligaram o recurso). Mas o Quarkus, ao achar um
-  `META-INF/jandex.idx` no jar, **usa esse índice e não reindexa** o jar, mesmo listado em `index-dependency`. Resultado
-  com a instrução antiga: `Unknown entity type ... Attachment` ao gravar o anexo. O que funciona sem mudar a lib é o
-  mapeamento XML (`quarkus.hibernate-orm.mapping-files`, passo 3). Provado: com o mapeamento e sem `index-dependency`,
-  `AttachmentFlowTest` passa; com `index-dependency` e sem o mapeamento, falha.
+- **A8 — `quarkus.index-dependency` não liga a entidade `Attachment` (resolvido na lib).** A lib deixa `Attachment` fora do
+  índice Jandex de propósito (hosts que não ligaram o recurso não precisam da tabela), e o Quarkus, ao achar um
+  `META-INF/jandex.idx` no jar, **usa esse índice e não reindexa** o jar, mesmo listado em `index-dependency`. A solução
+  é da extension: o build step `FileManagementProcessor` indexa a classe por `AdditionalIndexedClassesBuildItem` só com
+  `registry-table.enabled=true` (como `cities` e `security`). Provado: `EntidadeMapeadaSozinhaTest` vê `Attachment` sem
+  nenhuma propriedade de mapeamento; rodando o mesmo teste com `-Dseedgrid.filemanagement.registry-table.enabled=false`
+  a unidade de persistência fica sem entidade alguma.
 - **A4 — Flyway padrão enxerga a `V1300` como pendente.** `FlywayPadraoVeV1300Test` mostra, só lendo (`info()`), que a
   location padrão `classpath:db/migration` traz a `V1300` entre as pendentes e que listar só as locations do host a
   esconde. Um host com `quarkus.flyway.migrate-at-start=true` e a location padrão criaria `sg_attachments` mesmo com o
-  recurso desligado: por isso o host lista as próprias locations (como em `seedgrid-backup-example`).
-- **A9 — a chave gravada não volta inteira para os provedores de nuvem.** `sg_attachments.storage_path` guarda o URI da
-  `StorageKey` (`dropbox:///exemplo/id:1`) e `provider_file_id` fica nulo. `StorageKey.fromUri` não reconstrói a chave
-  desses provedores (a pasta raiz tem barra inicial e o id tem `:`), então o exemplo separa o URI na última barra
-  (`AttachmentService.keyOf`). Vale a lib guardar o id do provedor em `provider_file_id`.
+  recurso desligado: por isso um host que liga o Flyway do Quarkus aponta o próprio `quarkus.flyway.locations` (a migration é da extension e roda no runner dela).
+- **A9 — a chave gravada não volta inteira para os provedores de nuvem (resolvido na lib).** `StorageKey.fromUri` não
+  reconstrói a chave desses provedores (a pasta raiz tem barra inicial e o id tem `:`); a lib agora guarda o id do arquivo
+  em `sg_attachments.provider_file_id`, e o exemplo ainda separa o URI na última barra (`AttachmentService.keyOf`).
 - **O exemplo mudou duas asserções antigas, de propósito:** com anexos ligados o registry devolve o storage decorado
   (`AttachmentTrackingFileStorage`, e não `FilesystemStorage`), e o tipo `dropbox` deixou de ser "inexistente" (o teste
   agora usa `tipo-inexistente`).
