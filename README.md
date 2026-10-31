@@ -108,6 +108,7 @@ versão da tenancy e esquecer a do security, que só aparece muito depois e long
 | **seedgrid-ai-pricing** | Robô que lê preços de modelos de IA, propõe a mudança e só vale com aprovação humana | [`seedgrid-ai-pricing-example`](examples/seedgrid-ai-pricing-example) |
 | **seedgrid-resilience** | Circuit breaker, retry e timeout com defaults sensatos | [`seedgrid-resilience-example`](examples/seedgrid-resilience-example) |
 | **seedgrid-whatsapp** | Envio por WhatsApp, agnóstico de provedor (Evolution API ou Cloud API) | [`seedgrid-whatsapp-example`](examples/seedgrid-whatsapp-example) |
+| **seedgrid-realtime** | Avisos em tempo real ao usuário logado pelo SeedGrid Pulse: token de conexão da sessão e publicação a partir do evento neutro `SgUserEvent` (o exemplo traz um Pulse falso) | [`seedgrid-realtime-example`](examples/seedgrid-realtime-example) |
 
 ### Dados de referência
 
