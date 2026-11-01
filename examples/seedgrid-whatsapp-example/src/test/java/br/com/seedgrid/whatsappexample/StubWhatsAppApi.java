@@ -15,7 +15,7 @@ import br.com.seedgrid.whatsapp.dtos.WhatsAppMediaMessageFileDTO;
 import br.com.seedgrid.whatsapp.dtos.WhatsAppMediaMessageURLDTO;
 import br.com.seedgrid.whatsapp.dtos.WhatsAppSendMessageResultDTO;
 import br.com.seedgrid.whatsapp.dtos.WhatsAppTextMessageDTO;
-import br.com.seedgrid.whatsapp.exceptions.WhatsAppException;
+import br.com.seedgrid.whatsapp.exceptions.WhatsAppProviderException;
 import br.com.seedgrid.whatsapp.services.WhatsAppApi;
 import jakarta.annotation.Priority;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -30,7 +30,7 @@ import jakarta.enterprise.inject.Alternative;
  * para o provider externo e' simulada.
  *
  * <p>{@link #failNext} controla se a proxima chamada a {@code sendTextMessage} deve simular uma
- * falha do provider (equivalente a uma {@link WhatsAppException} lancada pela extension real).
+ * falha do provider (equivalente a uma {@link WhatsAppProviderException} lancada pela extension real).
  */
 @Alternative
 @Priority(1)
@@ -53,7 +53,7 @@ public class StubWhatsAppApi implements WhatsAppApi {
     public WhatsAppSendMessageResultDTO sendTextMessage(String channelId, WhatsAppTextMessageDTO msg) {
         calls.add(new Call(channelId, msg));
         if (failNext) {
-            throw new WhatsAppException("Simulated Evolution API outage");
+            throw new WhatsAppProviderException("Simulated Evolution API outage");
         }
         return new WhatsAppSendMessageResultDTO("stub-message-id-123", Map.of("stub", true));
     }

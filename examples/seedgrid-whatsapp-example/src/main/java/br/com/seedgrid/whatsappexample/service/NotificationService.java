@@ -7,6 +7,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import br.com.seedgrid.whatsapp.dtos.WhatsAppSendMessageResultDTO;
 import br.com.seedgrid.whatsapp.dtos.WhatsAppTextMessageDTO;
 import br.com.seedgrid.whatsapp.exceptions.WhatsAppException;
+import br.com.seedgrid.whatsapp.exceptions.WhatsAppProviderException;
 import br.com.seedgrid.whatsapp.services.WhatsAppApi;
 import br.com.seedgrid.whatsappexample.entity.Notification;
 import br.com.seedgrid.whatsappexample.entity.NotificationStatus;
@@ -48,7 +49,7 @@ public class NotificationService {
                     channelId, new WhatsAppTextMessageDTO(phoneNumber, message));
             notification.setStatus(NotificationStatus.SENT);
             notification.setProviderMessageId(result.messageId());
-        } catch (WhatsAppException e) {
+        } catch (WhatsAppException | WhatsAppProviderException e) {
             notification.setStatus(NotificationStatus.FAILED);
             notification.setErrorMessage(e.getMessage());
         }
