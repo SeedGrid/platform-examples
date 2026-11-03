@@ -3,7 +3,7 @@
 App de exemplo, rodável, do `seedgrid-quarkus-ext-user-notifications`: a caixa de notificações do usuário. O host **só
 coloca a dependência** `seedgrid-user-notifications`; a migration, as rotas `/user-notifications` e o bean `UserNotifier`
 vêm juntos, sem nenhuma propriedade obrigatória. Este host não tem `seedgrid-security`: o usuário é o padrão
-`no-security` do commons e as anotações de permissão não se aplicam.
+`no-security` do commons e o `@Authenticated` da rota é inerte (quem nega, sem usuário, é o próprio serviço).
 
 ## Fluxo demonstrado
 

@@ -25,8 +25,8 @@ import jakarta.inject.Inject;
 /**
  * Host com security + backup + user-notifications (so as dependencias): quando o export termina, o usuario que o pediu
  * encontra o aviso na caixa dele ({@code GET /user-notifications}), com o {@code exportPublicId} no payload. O download
- * continua pela rota do proprio backup. Prova tambem que o usuario comum le a caixa sem role extra (permissao
- * {@code USER_NOTIFICATION_READ} semeada como padrao de todo usuario logado).
+ * continua pela rota do proprio backup. Prova tambem que a caixa so exige estar logado (sem permissao propria,
+ * {@code @Authenticated}): sem token a rota responde 401.
  */
 @QuarkusTest
 @QuarkusTestResource(PostgresTestResource.class)
@@ -68,6 +68,14 @@ class BackupInboxNotificationTest {
                 .then().statusCode(204);
         given().header("Authorization", "Bearer " + token)
                 .when().get("/user-notifications/unread-count").then().statusCode(200).body("count", equalTo(0));
+    }
+
+    @Test
+    void inboxRoutesRequireALoggedInUser() {
+        given().when().get("/user-notifications").then().statusCode(401);
+        given().when().get("/user-notifications/unread-count").then().statusCode(401);
+        given().when().post("/user-notifications/read-all").then().statusCode(401);
+        given().when().delete("/user-notifications").then().statusCode(401);
     }
 
     private List<Map<String, Object>> awaitInbox(String token, String jobId) throws InterruptedException {
