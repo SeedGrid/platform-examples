@@ -1,6 +1,7 @@
 package br.com.seedgrid.subdomaintenancyexample;
 
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.sql.Connection;
@@ -84,5 +85,35 @@ class UserNotificationsTenantGuardianIT extends ProactiveAuthGuardianBase {
         assertEquals(String.valueOf(Integer.parseInt(betaAntes) + 1), notifications(betaUrl));
         assertEquals(String.valueOf(Integer.parseInt(alfaAntes) + 1), notifications(alfaUrl),
                 "o aviso do beta nao pode aparecer no banco do alfa");
+    }
+
+    /** Regra do dono: usuario nunca ve notificacao de outro usuario nem de outro tenant (rotas reais, tokens reais). */
+    @Test
+    void userNeverSeesAnotherUsersNotificationsInTheSameOrAnotherTenant() throws Exception {
+        // alfa: o admin recebe uma PROPRIA e ha uma de OUTRO usuario do mesmo tenant (endereco fixo do probe)
+        given().header("Host", HOST_ALFA).auth().oauth2(alfaToken).post("/probe/user-notifications/notify-self")
+                .then().statusCode(200);
+        given().header("Host", HOST_ALFA).auth().oauth2(alfaToken).post("/probe/user-notifications/notify")
+                .then().statusCode(200);
+        // beta: so' a propria
+        given().header("Host", HOST_BETA).auth().oauth2(betaToken).post("/probe/user-notifications/notify-self")
+                .then().statusCode(200);
+
+        Response alfa = given().header("Host", HOST_ALFA).auth().oauth2(alfaToken).get("/user-notifications");
+        assertEquals(200, alfa.statusCode(), alfa.body().asString());
+        // so' notificacoes "probe.self" do proprio usuario: a do outro usuario do mesmo tenant e a do beta nao aparecem
+        alfa.then().body("items.type.flatten().unique()", org.hamcrest.Matchers.contains("probe.self"));
+        Response beta = given().header("Host", HOST_BETA).auth().oauth2(betaToken).get("/user-notifications");
+        assertEquals(200, beta.statusCode(), beta.body().asString());
+        beta.then().body("items.type.flatten().unique()", org.hamcrest.Matchers.contains("probe.self"));
+
+        // o id de uma notificacao do alfa nao existe para o beta (404)
+        String idAlfa = alfa.jsonPath().getString("items[0].publicId");
+        given().header("Host", HOST_BETA).auth().oauth2(betaToken).post("/user-notifications/" + idAlfa + "/read")
+                .then().statusCode(404);
+        given().header("Host", HOST_BETA).auth().oauth2(betaToken).delete("/user-notifications/" + idAlfa)
+                .then().statusCode(404);
+        given().header("Host", HOST_ALFA).auth().oauth2(alfaToken).get("/user-notifications/unread-count")
+                .then().statusCode(200);
     }
 }

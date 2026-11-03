@@ -84,6 +84,28 @@ class UserNotificationsAccountGuardianIT {
         assertEquals(publicIdB, scalar("select account_public_id from sg_user_notification where public_id = '" + idB + "'"));
     }
 
+    /** Regra do dono: usuario nunca ve notificacao de outro usuario (mesma empresa) nem de outra empresa. */
+    @Test
+    void userNeverSeesAnotherUsersNotificationsInTheSameOrAnotherCompany() {
+        given().header("Authorization", "Bearer " + tokenA).post("/probe/user-notifications/notify-self")
+                .then().statusCode(200);
+        // notificacao de OUTRO usuario da MESMA empresa A (endereco fixo do probe)
+        given().header("Authorization", "Bearer " + tokenA).post("/probe/user-notifications/notify").then().statusCode(200);
+        given().header("Authorization", "Bearer " + tokenB).post("/probe/user-notifications/notify-self")
+                .then().statusCode(200);
+
+        Response a = given().header("Authorization", "Bearer " + tokenA).get("/user-notifications");
+        assertEquals(200, a.statusCode(), a.body().asString());
+        a.then().body("items.type.flatten().unique()", org.hamcrest.Matchers.contains("probe.self"));
+        Response b = given().header("Authorization", "Bearer " + tokenB).get("/user-notifications");
+        assertEquals(200, b.statusCode(), b.body().asString());
+        b.then().body("items.type.flatten().unique()", org.hamcrest.Matchers.contains("probe.self"));
+
+        String idA = a.jsonPath().getString("items[0].publicId");
+        given().header("Authorization", "Bearer " + tokenB).post("/user-notifications/" + idA + "/read").then().statusCode(404);
+        given().header("Authorization", "Bearer " + tokenB).delete("/user-notifications/" + idA).then().statusCode(404);
+    }
+
     private String notify(String token) {
         Response r = given().header("Authorization", "Bearer " + token).post("/probe/user-notifications/notify");
         assertEquals(200, r.statusCode(), r.body().asString());

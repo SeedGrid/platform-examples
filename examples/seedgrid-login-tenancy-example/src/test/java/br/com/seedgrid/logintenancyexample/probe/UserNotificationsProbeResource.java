@@ -1,6 +1,7 @@
 package br.com.seedgrid.logintenancyexample.probe;
 
 import br.com.seedgrid.usernotifications.services.UserNotifier;
+import br.com.seedgrid.commons.persistence.spis.CurrentUserProvider;
 import io.quarkus.security.Authenticated;
 import io.smallrye.common.annotation.Blocking;
 import jakarta.inject.Inject;
@@ -19,6 +20,20 @@ public class UserNotificationsProbeResource {
 
     @Inject
     UserNotifier notifier;
+    @Inject
+    CurrentUserProvider currentUser;
+
+    /** Notifica o PROPRIO usuario da requisicao (conta da requisicao). */
+    @POST
+    @Path("/notify-self")
+    public Response notifySelf() {
+        try {
+            return Response.ok(notifier.notify(currentUser.getCurrentUserPublicId(), "probe.self", "Aviso proprio", null,
+                    null)).build();
+        } catch (Throwable t) {
+            return Response.serverError().entity("FAIL " + t.getClass().getName() + ": " + t.getMessage()).build();
+        }
+    }
 
     @POST
     @Path("/notify")
