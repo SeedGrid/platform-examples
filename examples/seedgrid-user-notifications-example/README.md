@@ -29,4 +29,4 @@ Swagger em `http://localhost:8098/q/swagger-ui`.
 ## Configuração
 
 `quarkus.hibernate-orm.packages` lista `br.com.seedgrid.usernotifications.entities` e as do commons. Opcionais:
-`seedgrid.user-notifications.retention` (P30D), `max-per-user` (200), `max-payload-bytes` (4096), `enabled` (true).
+`seedgrid.user-notifications.retention` (P30D), `max-per-user` (100), `max-payload-bytes` (4096), `enabled` (true).
