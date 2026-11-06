@@ -85,7 +85,7 @@
         <dependency>
             <groupId>br.com.seedgrid</groupId>
             <artifactId>seedgrid-backup</artifactId>
-            <version>2026.11.04</version>
+            <version>2026.11.05</version>
         </dependency>
         <!-- Caixa de notificacoes do usuario: com ela no host, o fim do export deixa um aviso (backup.finished / backup.failed). -->
         <dependency>
